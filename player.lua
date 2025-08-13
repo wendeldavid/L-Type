@@ -16,16 +16,16 @@ function Player:update(dt, controls)
     if controls.left() then vx = -self.speed end
     if controls.right() then vx = self.speed end
     self.collider:setLinearVelocity(vx, vy)
-    local nx, ny = self.collider:getPosition()
-    nx = math.max(15, math.min(640-15, nx))
-    ny = math.max(15, math.min(480-15, ny))
-    self.collider:setPosition(nx, ny)
+    local px, py = self.collider:getPosition()
+    px = math.max(15, math.min(640-15, px))
+    py = math.max(15, math.min(480-15, py))
+    self.collider:setPosition(px, py)
 end
 
 function Player:draw()
-    local nx, ny = self.collider:getPosition()
+    local px, py = self.collider:getPosition()
     love.graphics.setColor(0.4, 0.7, 1)
-    love.graphics.rectangle('line', nx-15, ny-15, 30, 30)
+    love.graphics.rectangle('line', px-15, py-15, 30, 30)
 end
 
 return Player

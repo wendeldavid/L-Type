@@ -1,15 +1,15 @@
 
-local largura, altura = 640, 480
+local width, height = 640, 480
 local Gamestate = require 'libs.hump.gamestate'
 
-local jogo = {}
+local game = {}
 local menu = {selected = 1}
 local options = {}
 local credits = {}
 
 function menu:draw()
     love.graphics.setColor(1,1,1)
-    love.graphics.printf("L-TYPE", 0, altura/2-80, largura, 'center')
+    love.graphics.printf("L-TYPE", 0, height/2-80, width, 'center')
     local items = {"Jogar", "Opções", "Créditos"}
     for i, item in ipairs(items) do
         if self.selected == i then
@@ -17,7 +17,7 @@ function menu:draw()
         else
             love.graphics.setColor(1,1,1)
         end
-        love.graphics.printf(item, 0, altura/2-20 + (i-1)*40, largura, 'center')
+        love.graphics.printf(item, 0, height/2-20 + (i-1)*40, width, 'center')
     end
 end
 
@@ -30,7 +30,7 @@ function menu:keypressed(key)
         if self.selected > 3 then self.selected = 1 end
     elseif key == 'return' or key == 'kpenter' then
         if self.selected == 1 then
-            Gamestate.switch(jogo)
+            Gamestate.switch(game)
         elseif self.selected == 2 then
             Gamestate.switch(options)
         elseif self.selected == 3 then
@@ -41,7 +41,7 @@ function menu:keypressed(key)
     end
 function options:draw()
     love.graphics.setColor(1,1,1)
-    love.graphics.printf("Opções", 0, 40, largura, 'center')
+    love.graphics.printf("Opções", 0, 40, width, 'center')
 end
 
 function options:keypressed(key)
@@ -52,7 +52,7 @@ end
 
 function credits:draw()
     love.graphics.setColor(1,1,1)
-    love.graphics.printf("Criado por: Wendel David Przygoda", 0, altura/2-20, largura, 'center')
+    love.graphics.printf("Criado por: Wendel David Przygoda", 0, height/2-20, width, 'center')
 end
 
 function credits:keypressed(key)
@@ -68,9 +68,9 @@ local pause = {}
 function pause:draw()
     if pause.prev then pause.prev:draw() end
     love.graphics.setColor(0,0,0,0.6)
-    love.graphics.rectangle('fill', 0, 0, largura, altura)
+    love.graphics.rectangle('fill', 0, 0, width, height)
     love.graphics.setColor(1,1,1)
-    love.graphics.printf("PAUSADO\nPressione START para continuar", 0, altura/2-20, largura, 'center')
+    love.graphics.printf("PAUSADO\nPressione START para continuar", 0, height/2-20, width, 'center')
 end
 
 function pause:keypressed(key)
@@ -91,7 +91,7 @@ local intervalo_particula = 0.15
 local wf = require 'libs.windfield.windfield'
 local anim8 = require 'libs.anim8.anim8'
 
-function jogo:enter()
+function game:enter()
     particulas = {}
     tempo_particula = 0
     love.graphics.setBackgroundColor(0,0,0)
@@ -104,7 +104,7 @@ function jogo:enter()
     self.map = nil
 
     -- Jogador
-    self.nave = self.world:newRectangleCollider(50, altura/2 - 15, 30, 30)
+    self.nave = self.world:newRectangleCollider(50, height/2 - 15, 30, 30)
     self.nave:setType('dynamic')
     self.nave.speed = 200
 
@@ -119,13 +119,13 @@ function jogo:enter()
     self.intervalo_tiro_inimigo = 5
 end
 
-function jogo:update(dt)
+function game:update(dt)
     -- Partículas brancas (sem hitbox)
     tempo_particula = tempo_particula + dt
     if tempo_particula >= intervalo_particula then
         tempo_particula = 0
-        local py = math.random(0, altura)
-        table.insert(particulas, {x = largura, y = py, r = math.random(1,3)})
+        local py = math.random(0, height)
+        table.insert(particulas, {x = width, y = py, r = math.random(1,3)})
     end
     for i = #particulas, 1, -1 do
         local p = particulas[i]
@@ -142,15 +142,15 @@ function jogo:update(dt)
     self.nave:setLinearVelocity(vx, vy)
     -- Limitar nave à tela
     local nx, ny = self.nave:getPosition()
-    nx = math.max(15, math.min(largura-15, nx))
-    ny = math.max(15, math.min(altura-15, ny))
+    nx = math.max(15, math.min(width-15, nx))
+    ny = math.max(15, math.min(height-15, ny))
     self.nave:setPosition(nx, ny)
 
     -- Atualiza tiros do jogador
     for i = #self.tiros, 1, -1 do
         local t = self.tiros[i]
         t.collider:setX(t.collider:getX() + t.speed * dt)
-        if t.collider:getX() > largura then t.collider:destroy(); table.remove(self.tiros, i) end
+        if t.collider:getX() > width then t.collider:destroy(); table.remove(self.tiros, i) end
     end
 
     -- Atualiza inimigos
@@ -171,9 +171,9 @@ function jogo:update(dt)
     self.tempo_spawn = self.tempo_spawn + dt
     if self.tempo_spawn >= self.intervalo_spawn then
         self.tempo_spawn = 0
-        local iy = math.random(15, altura-15)
+        local iy = math.random(15, height-15)
         local inimigo = {}
-        inimigo.collider = self.world:newRectangleCollider(largura-40, iy, 30, 30)
+        inimigo.collider = self.world:newRectangleCollider(width-40, iy, 30, 30)
         inimigo.collider:setType('dynamic')
         inimigo.speed = 80
         inimigo.tempo_tiro = 0
@@ -217,7 +217,7 @@ function jogo:update(dt)
         local tx, ty = t.collider:getPosition()
         if math.abs(tx - nave_x) < (12+30)/2 and math.abs(ty - nave_y) < (6+30)/2 then
             t.collider:destroy(); table.remove(self.tiros_inimigos, i)
-            Gamestate.switch(jogo)
+            Gamestate.switch(game)
             return
         end
     end
@@ -228,13 +228,13 @@ function jogo:update(dt)
         local ex, ey = e.collider:getPosition()
         if math.abs(nave_x - ex) < (30+30)/2 and math.abs(nave_y - ey) < (30+30)/2 then
             e.collider:destroy(); table.remove(self.inimigos, i)
-            Gamestate.switch(jogo)
+            Gamestate.switch(game)
             return
         end
     end
 end
 
-function jogo:keypressed(key)
+function game:keypressed(key)
     if key == 'b' then
         local nx, ny = self.nave:getPosition()
         local tiro = {}
@@ -250,7 +250,7 @@ function jogo:keypressed(key)
     end
 end
 
-function jogo:draw()
+function game:draw()
     -- Partículas brancas
     love.graphics.setColor(1,1,1,0.7)
     for _, p in ipairs(particulas) do
@@ -284,7 +284,7 @@ function jogo:draw()
 end
 
 function love.load()
-    love.window.setMode(largura, altura)
+    love.window.setMode(width, height)
     Gamestate.registerEvents()
     Gamestate.switch(menu)
 end

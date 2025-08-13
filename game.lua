@@ -5,17 +5,19 @@ local Enemy = require 'enemy'
 
 local game = {}
 
+
 function game:enter()
     self.world = wf.newWorld(0, 0, true)
     self.world:setQueryDebugDrawing(false)
     self.player = Player:new(self.world, 50, 480/2 - 15)
     self.enemies = {}
-    self.tiros = {}
-    self.tiros_inimigos = {}
-    self.tempo_spawn = 0
-    self.intervalo_spawn = 2
-    self.intervalo_tiro_inimigo = 5
+    self.player_bullets = {}
+    self.enemy_bullets = {}
+    self.spawn_timer = 0
+    self.spawn_interval = 2
+    self.enemy_shoot_interval = 5
 end
+
 
 function game:update(dt)
     self.player:update(dt, require('controls'))
@@ -27,9 +29,9 @@ function game:update(dt)
         end
     end
     -- Spawn de inimigos
-    self.tempo_spawn = self.tempo_spawn + dt
-    if self.tempo_spawn >= self.intervalo_spawn then
-        self.tempo_spawn = 0
+    self.spawn_timer = self.spawn_timer + dt
+    if self.spawn_timer >= self.spawn_interval then
+        self.spawn_timer = 0
         local iy = math.random(15, 480-15)
         table.insert(self.enemies, Enemy:new(self.world, 640-40, iy))
     end

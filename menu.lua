@@ -4,7 +4,7 @@ local menu = {selected = 1}
 function menu:draw()
     love.graphics.setColor(1,1,1)
     love.graphics.printf("L-TYPE", 0, 480/2-80, 640, 'center')
-    local items = {"Jogar", "Opções", "Créditos"}
+    local items = {"Play", "Options", "Credits"}
     for i, item in ipairs(items) do
         if self.selected == i then
             love.graphics.setColor(1, 0.7, 0.2)

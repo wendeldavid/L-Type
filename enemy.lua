@@ -6,7 +6,7 @@ function Enemy:new(world, x, y)
     obj.collider = world:newRectangleCollider(x, y, 30, 30)
     obj.collider:setType('dynamic')
     obj.speed = 80
-    obj.tempo_tiro = 0
+    obj.shoot_timer = 0
     return obj
 end
 
