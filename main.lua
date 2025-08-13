@@ -1,7 +1,24 @@
 
-
 local largura, altura = 640, 480
 local Gamestate = require 'libs.hump.gamestate'
+
+local jogo = {}
+local menu = {}
+
+function menu:draw()
+    love.graphics.setColor(1,1,1)
+    love.graphics.printf("L-TYPE\nPressione ENTER para jogar", 0, altura/2-40, largura, 'center')
+end
+
+function menu:keypressed(key)
+    if key == 'return' or key == 'kpenter' then
+        Gamestate.switch(jogo)
+    elseif key == 'escape' then
+        love.event.quit()
+    end
+end
+
+
 local pause = {}
 
 function pause:draw()
@@ -29,8 +46,6 @@ local intervalo_particula = 0.15
 
 local wf = require 'libs.windfield.windfield'
 local anim8 = require 'libs.anim8.anim8'
-
-local jogo = {}
 
 function jogo:enter()
     particulas = {}
@@ -188,7 +203,7 @@ function jogo:keypressed(key)
         pause.prev = self
         Gamestate.push(pause)
     elseif key == 'escape' then
-        love.event.quit()
+        Gamestate.switch(menu)
     end
 end
 
@@ -227,6 +242,6 @@ end
 
 function love.load()
     Gamestate.registerEvents()
-    Gamestate.switch(jogo)
+    Gamestate.switch(menu)
 end
 
