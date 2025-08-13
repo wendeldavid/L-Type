@@ -3,19 +3,63 @@ local largura, altura = 640, 480
 local Gamestate = require 'libs.hump.gamestate'
 
 local jogo = {}
-local menu = {}
+local menu = {selected = 1}
+local options = {}
+local credits = {}
 
 function menu:draw()
     love.graphics.setColor(1,1,1)
-    love.graphics.printf("L-TYPE\nPressione ENTER para jogar", 0, altura/2-40, largura, 'center')
+    love.graphics.printf("L-TYPE", 0, altura/2-80, largura, 'center')
+    local items = {"Jogar", "Opções", "Créditos"}
+    for i, item in ipairs(items) do
+        if self.selected == i then
+            love.graphics.setColor(1, 0.7, 0.2)
+        else
+            love.graphics.setColor(1,1,1)
+        end
+        love.graphics.printf(item, 0, altura/2-20 + (i-1)*40, largura, 'center')
+    end
 end
 
 function menu:keypressed(key)
-    if key == 'return' or key == 'kpenter' then
-        Gamestate.switch(jogo)
+    if key == 'up' or key == 'w' then
+        self.selected = self.selected - 1
+        if self.selected < 1 then self.selected = 3 end
+    elseif key == 'down' or key == 's' then
+        self.selected = self.selected + 1
+        if self.selected > 3 then self.selected = 1 end
+    elseif key == 'return' or key == 'kpenter' then
+        if self.selected == 1 then
+            Gamestate.switch(jogo)
+        elseif self.selected == 2 then
+            Gamestate.switch(options)
+        elseif self.selected == 3 then
+            Gamestate.switch(credits)
+        end
     elseif key == 'escape' then
         love.event.quit()
     end
+function options:draw()
+    love.graphics.setColor(1,1,1)
+    love.graphics.printf("Opções", 0, 40, largura, 'center')
+end
+
+function options:keypressed(key)
+    if key == 'escape' then
+        Gamestate.switch(menu)
+    end
+end
+
+function credits:draw()
+    love.graphics.setColor(1,1,1)
+    love.graphics.printf("Criado por: Wendel David Przygoda", 0, altura/2-20, largura, 'center')
+end
+
+function credits:keypressed(key)
+    if key == 'escape' then
+        Gamestate.switch(menu)
+    end
+end
 end
 
 
@@ -26,11 +70,11 @@ function pause:draw()
     love.graphics.setColor(0,0,0,0.6)
     love.graphics.rectangle('fill', 0, 0, largura, altura)
     love.graphics.setColor(1,1,1)
-    love.graphics.printf("PAUSADO\nPressione P para continuar", 0, altura/2-20, largura, 'center')
+    love.graphics.printf("PAUSADO\nPressione START para continuar", 0, altura/2-20, largura, 'center')
 end
 
 function pause:keypressed(key)
-    if key == 'p' then
+    if key == 'return' then
         Gamestate.pop()
     elseif key == 'escape' then
         love.event.quit()
@@ -50,7 +94,6 @@ local anim8 = require 'libs.anim8.anim8'
 function jogo:enter()
     particulas = {}
     tempo_particula = 0
-    love.window.setMode(largura, altura)
     love.graphics.setBackgroundColor(0,0,0)
 
     -- Mundo de física
@@ -92,10 +135,10 @@ function jogo:update(dt)
     self.world:update(dt)
     -- Movimento nave
     local vx, vy = 0, 0
-    if love.keyboard.isDown('up') then vy = -self.nave.speed end
-    if love.keyboard.isDown('down') then vy = self.nave.speed end
-    if love.keyboard.isDown('left') then vx = -self.nave.speed end
-    if love.keyboard.isDown('right') then vx = self.nave.speed end
+    if love.keyboard.isDown('up') or love.keyboard.isDown('w') then vy = -self.nave.speed end
+    if love.keyboard.isDown('down') or love.keyboard.isDown('s') then vy = self.nave.speed end
+    if love.keyboard.isDown('left') or love.keyboard.isDown('a') then vx = -self.nave.speed end
+    if love.keyboard.isDown('right') or love.keyboard.isDown('d') then vx = self.nave.speed end
     self.nave:setLinearVelocity(vx, vy)
     -- Limitar nave à tela
     local nx, ny = self.nave:getPosition()
@@ -192,14 +235,14 @@ function jogo:update(dt)
 end
 
 function jogo:keypressed(key)
-    if key == 'space' then
+    if key == 'b' then
         local nx, ny = self.nave:getPosition()
         local tiro = {}
         tiro.collider = self.world:newRectangleCollider(nx+15, ny-3, 12, 6)
         tiro.collider:setType('dynamic')
         tiro.speed = 300
         table.insert(self.tiros, tiro)
-    elseif key == 'p' then
+    elseif key == 'return' then
         pause.prev = self
         Gamestate.push(pause)
     elseif key == 'escape' then
@@ -241,6 +284,7 @@ function jogo:draw()
 end
 
 function love.load()
+    love.window.setMode(largura, altura)
     Gamestate.registerEvents()
     Gamestate.switch(menu)
 end
