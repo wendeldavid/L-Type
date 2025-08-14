@@ -5,27 +5,74 @@ function Player:new(world, x, y)
     local obj = setmetatable({}, self)
     obj.collider = world:newRectangleCollider(x, y, 30, 30)
     obj.collider:setType('dynamic')
+    obj.collider:setFixedRotation(true) -- Garantir que o collider não gire
     obj.speed = 200
+    obj.projectiles = {}
     return obj
 end
 
-function Player:update(dt, controls)
+function Player:shoot()
+    local px, py = self.collider:getPosition()
+    local projectile = {
+        x = px + 15, -- Posição inicial do projétil à frente do jogador
+        y = py,
+        speed = 300 -- Velocidade do projétil
+    }
+    table.insert(self.projectiles, projectile)
+end
+
+function Player:isMovingUp()
+    return love.keyboard.isDown('up') or love.keyboard.isDown('w')
+end
+
+function Player:isMovingDown()
+    return love.keyboard.isDown('down') or love.keyboard.isDown('s')
+end
+
+function Player:isMovingLeft()
+    return love.keyboard.isDown('left') or love.keyboard.isDown('a')
+end
+
+function Player:isMovingRight()
+    return love.keyboard.isDown('right') or love.keyboard.isDown('d')
+end
+
+function Player:update(dt)
     local vx, vy = 0, 0
-    if controls.up() then vy = -self.speed end
-    if controls.down() then vy = self.speed end
-    if controls.left() then vx = -self.speed end
-    if controls.right() then vx = self.speed end
+    if self:isMovingUp() then vy = -self.speed end
+    if self:isMovingDown() then vy = self.speed end
+    if self:isMovingLeft() then vx = -self.speed end
+    if self:isMovingRight() then vx = self.speed end
+
     self.collider:setLinearVelocity(vx, vy)
     local px, py = self.collider:getPosition()
-    px = math.max(15, math.min(640-15, px))
-    py = math.max(15, math.min(480-15, py))
-    self.collider:setPosition(px, py)
+
+    -- Atualizar projéteis
+    for i = #self.projectiles, 1, -1 do
+        local proj = self.projectiles[i]
+        proj.x = proj.x + proj.speed * dt
+        if proj.x > 640 then -- Remover projéteis que saem da tela
+            table.remove(self.projectiles, i)
+        end
+    end
 end
 
 function Player:draw()
     local px, py = self.collider:getPosition()
     love.graphics.setColor(0.4, 0.7, 1)
     love.graphics.rectangle('line', px-15, py-15, 30, 30)
+
+    -- Desenhar projéteis
+    love.graphics.setColor(1, 0.5, 0)
+    for _, proj in ipairs(self.projectiles) do
+        love.graphics.rectangle('fill', proj.x, proj.y - 2, 10, 4)
+    end
+end
+
+function Player:keypressed(key)
+    if key == 'b' then
+        self:shoot()
+    end
 end
 
 return Player

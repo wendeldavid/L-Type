@@ -1,4 +1,5 @@
 local Gamestate = require 'libs.hump.gamestate'
+
 local menu = {selected = 1}
 
 function menu:draw()
@@ -26,7 +27,7 @@ function menu:keypressed(key)
         if self.selected == 1 then
             Gamestate.switch(require('game'))
         elseif self.selected == 2 then
-            Gamestate.switch(require('controls'))
+            Gamestate.switch(require('options'))
         elseif self.selected == 3 then
             Gamestate.switch(require('credits'))
         end
