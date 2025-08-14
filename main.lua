@@ -1,4 +1,3 @@
-
 local width, height = 640, 480
 local Gamestate = require 'libs.hump.gamestate'
 
@@ -81,9 +80,9 @@ function pause:keypressed(key)
     end
 end
 -- Partículas visuais (sem hitbox)
-local particulas = {}
-local tempo_particula = 0
-local intervalo_particula = 0.15
+local moving_particles = {}
+local particle_time = 0
+local particle_interval = 0.15
 
 
 -- Carrega libs externas
@@ -92,142 +91,151 @@ local wf = require 'libs.windfield.windfield'
 local anim8 = require 'libs.anim8.anim8'
 
 function game:enter()
-    particulas = {}
-    tempo_particula = 0
+    moving_particles = {}
+    particle_time = 0
     love.graphics.setBackgroundColor(0,0,0)
 
     -- Mundo de física
     self.world = wf.newWorld(0, 0, true)
     self.world:setQueryDebugDrawing(false)
 
+    -- Define collision classes
+    self.world:addCollisionClass('Player')
+    self.world:addCollisionClass('Enemy')
+    self.world:addCollisionClass('PlayerProjectile', {ignores = {'Player', 'PlayerProjectile'}})
+    self.world:addCollisionClass('EnemyProjectile', {ignores = {'Enemy', 'EnemyProjectile'}})
+
     -- Mapa STI (não utilizado, fundo preto)
     self.map = nil
 
     -- Jogador
-    self.nave = self.world:newRectangleCollider(50, height/2 - 15, 30, 30)
-    self.nave:setType('dynamic')
-    self.nave.speed = 200
+    self.player_ship = self.world:newRectangleCollider(50, height/2 - 15, 30, 30)
+    self.player_ship:setType('dynamic')
+    self.player_ship.speed = 200
+    self.player_ship:setCollisionClass('Player')
 
-    -- Tiros
-    self.tiros = {}
+    -- player_projectile
+    self.player_projectile = {}
 
-    -- Inimigos
-    self.inimigos = {}
-    self.tiros_inimigos = {}
-    self.tempo_spawn = 0
-    self.intervalo_spawn = 2
-    self.intervalo_tiro_inimigo = 5
+    -- enemies
+    self.enemies = {}
+    self.enemy_projectile = {}
+    self.enemy_spawn_time = 0
+    self.enemy_spawn_interval = 2
+    self.enemy_projectile_interval = 2
 end
 
 function game:update(dt)
     -- Partículas brancas (sem hitbox)
-    tempo_particula = tempo_particula + dt
-    if tempo_particula >= intervalo_particula then
-        tempo_particula = 0
+    particle_time = particle_time + dt
+    if particle_time >= particle_interval then
+        particle_time = 0
         local py = math.random(0, height)
-        table.insert(particulas, {x = width, y = py, r = math.random(1,3)})
+        table.insert(moving_particles, {x = width, y = py, r = math.random(1,3)})
     end
-    for i = #particulas, 1, -1 do
-        local p = particulas[i]
+    for i = #moving_particles, 1, -1 do
+        local p = moving_particles[i]
         p.x = p.x - 30 * dt
-        if p.x < -5 then table.remove(particulas, i) end
+        if p.x < -5 then table.remove(moving_particles, i) end
     end
     self.world:update(dt)
-    -- Movimento nave
+    -- Movimento player_ship
     local vx, vy = 0, 0
-    if love.keyboard.isDown('up') or love.keyboard.isDown('w') then vy = -self.nave.speed end
-    if love.keyboard.isDown('down') or love.keyboard.isDown('s') then vy = self.nave.speed end
-    if love.keyboard.isDown('left') or love.keyboard.isDown('a') then vx = -self.nave.speed end
-    if love.keyboard.isDown('right') or love.keyboard.isDown('d') then vx = self.nave.speed end
-    self.nave:setLinearVelocity(vx, vy)
-    -- Limitar nave à tela
-    local nx, ny = self.nave:getPosition()
+    if love.keyboard.isDown('up') or love.keyboard.isDown('w') then vy = -self.player_ship.speed end
+    if love.keyboard.isDown('down') or love.keyboard.isDown('s') then vy = self.player_ship.speed end
+    if love.keyboard.isDown('left') or love.keyboard.isDown('a') then vx = -self.player_ship.speed end
+    if love.keyboard.isDown('right') or love.keyboard.isDown('d') then vx = self.player_ship.speed end
+    self.player_ship:setLinearVelocity(vx, vy)
+    -- Limitar player_ship à tela
+    local nx, ny = self.player_ship:getPosition()
     nx = math.max(15, math.min(width-15, nx))
     ny = math.max(15, math.min(height-15, ny))
-    self.nave:setPosition(nx, ny)
+    self.player_ship:setPosition(nx, ny)
 
-    -- Atualiza tiros do jogador
-    for i = #self.tiros, 1, -1 do
-        local t = self.tiros[i]
+    -- Atualiza player_projectile do jogador
+    for i = #self.player_projectile, 1, -1 do
+        local t = self.player_projectile[i]
         t.collider:setX(t.collider:getX() + t.speed * dt)
-        if t.collider:getX() > width then t.collider:destroy(); table.remove(self.tiros, i) end
+        if t.collider:getX() > width then t.collider:destroy(); table.remove(self.player_projectile, i) end
     end
 
-    -- Atualiza inimigos
-    for i = #self.inimigos, 1, -1 do
-        local e = self.inimigos[i]
+    -- Atualiza enemies
+    for i = #self.enemies, 1, -1 do
+        local e = self.enemies[i]
         e.collider:setX(e.collider:getX() - e.speed * dt)
-        if e.collider:getX() + 15 < 0 then e.collider:destroy(); table.remove(self.inimigos, i) end
+        if e.collider:getX() + 15 < 0 then e.collider:destroy(); table.remove(self.enemies, i) end
     end
 
-    -- Atualiza tiros dos inimigos
-    for i = #self.tiros_inimigos, 1, -1 do
-        local t = self.tiros_inimigos[i]
+    -- Atualiza player_projectile dos enemies
+    for i = #self.enemy_projectile, 1, -1 do
+        local t = self.enemy_projectile[i]
         t.collider:setX(t.collider:getX() - t.speed * dt)
-        if t.collider:getX() + 6 < 0 then t.collider:destroy(); table.remove(self.tiros_inimigos, i) end
+        if t.collider:getX() + 6 < 0 then t.collider:destroy(); table.remove(self.enemy_projectile, i) end
     end
 
-    -- Spawn de inimigos
-    self.tempo_spawn = self.tempo_spawn + dt
-    if self.tempo_spawn >= self.intervalo_spawn then
-        self.tempo_spawn = 0
+    -- Spawn de enemies
+    self.enemy_spawn_time = self.enemy_spawn_time + dt
+    if self.enemy_spawn_time >= self.enemy_spawn_interval then
+        self.enemy_spawn_time = 0
         local iy = math.random(15, height-15)
         local inimigo = {}
         inimigo.collider = self.world:newRectangleCollider(width-40, iy, 30, 30)
         inimigo.collider:setType('dynamic')
         inimigo.speed = 80
         inimigo.tempo_tiro = 0
-        table.insert(self.inimigos, inimigo)
+        inimigo.collider:setCollisionClass('Enemy')
+        table.insert(self.enemies, inimigo)
     end
 
-    -- Tiros dos inimigos
-    for _, e in ipairs(self.inimigos) do
+    -- projetil dos inimigos
+    for _, e in ipairs(self.enemies) do
         e.tempo_tiro = (e.tempo_tiro or 0) + dt
-        if e.tempo_tiro >= self.intervalo_tiro_inimigo then
+        if e.tempo_tiro >= self.enemy_projectile_interval then
             e.tempo_tiro = 0
             local ex, ey = e.collider:getPosition()
             local tiro = {}
             tiro.collider = self.world:newRectangleCollider(ex-15, ey-3, 12, 6)
             tiro.collider:setType('dynamic')
             tiro.speed = 180
-            table.insert(self.tiros_inimigos, tiro)
+            tiro.collider:setCollisionClass('EnemyProjectile')
+            table.insert(self.enemy_projectile, tiro)
         end
     end
 
     -- Colisão: tiro jogador vs inimigo
-    for i = #self.tiros, 1, -1 do
-        local t = self.tiros[i]
+    for i = #self.player_projectile, 1, -1 do
+        local t = self.player_projectile[i]
         local tx, ty = t.collider:getPosition()
-        for j = #self.inimigos, 1, -1 do
-            local e = self.inimigos[j]
+        for j = #self.enemies, 1, -1 do
+            local e = self.enemies[j]
             local ex, ey = e.collider:getPosition()
             -- Checagem manual de bounding box
             if math.abs(tx - ex) < (12+30)/2 and math.abs(ty - ey) < (6+30)/2 then
-                t.collider:destroy(); table.remove(self.tiros, i)
-                e.collider:destroy(); table.remove(self.inimigos, j)
+                t.collider:destroy(); table.remove(self.player_projectile, i)
+                e.collider:destroy(); table.remove(self.enemies, j)
                 break
             end
         end
     end
 
-    -- Colisão: tiro inimigo vs nave
-    local nave_x, nave_y = self.nave:getPosition()
-    for i = #self.tiros_inimigos, 1, -1 do
-        local t = self.tiros_inimigos[i]
+    -- Colisão: tiro inimigo vs player_ship
+    local player_ship_x, player_ship_y = self.player_ship:getPosition()
+    for i = #self.enemy_projectile, 1, -1 do
+        local t = self.enemy_projectile[i]
         local tx, ty = t.collider:getPosition()
-        if math.abs(tx - nave_x) < (12+30)/2 and math.abs(ty - nave_y) < (6+30)/2 then
-            t.collider:destroy(); table.remove(self.tiros_inimigos, i)
+        if math.abs(tx - player_ship_x) < (12+30)/2 and math.abs(ty - player_ship_y) < (6+30)/2 then
+            t.collider:destroy(); table.remove(self.enemy_projectile, i)
             Gamestate.switch(game)
             return
         end
     end
 
-    -- Colisão: nave vs inimigos
-    for i = #self.inimigos, 1, -1 do
-        local e = self.inimigos[i]
+    -- Colisão: player_ship vs enemies
+    for i = #self.enemies, 1, -1 do
+        local e = self.enemies[i]
         local ex, ey = e.collider:getPosition()
-        if math.abs(nave_x - ex) < (30+30)/2 and math.abs(nave_y - ey) < (30+30)/2 then
-            e.collider:destroy(); table.remove(self.inimigos, i)
+        if math.abs(player_ship_x - ex) < (30+30)/2 and math.abs(player_ship_y - ey) < (30+30)/2 then
+            e.collider:destroy(); table.remove(self.enemies, i)
             Gamestate.switch(game)
             return
         end
@@ -236,12 +244,13 @@ end
 
 function game:keypressed(key)
     if key == 'b' then
-        local nx, ny = self.nave:getPosition()
+        local nx, ny = self.player_ship:getPosition()
         local tiro = {}
         tiro.collider = self.world:newRectangleCollider(nx+15, ny-3, 12, 6)
         tiro.collider:setType('dynamic')
         tiro.speed = 300
-        table.insert(self.tiros, tiro)
+        tiro.collider:setCollisionClass('PlayerProjectile')
+        table.insert(self.player_projectile, tiro)
     elseif key == 'return' then
         pause.prev = self
         Gamestate.push(pause)
@@ -253,31 +262,31 @@ end
 function game:draw()
     -- Partículas brancas
     love.graphics.setColor(1,1,1,0.7)
-    for _, p in ipairs(particulas) do
+    for _, p in ipairs(moving_particles) do
         love.graphics.circle('fill', p.x, p.y, p.r)
     end
-    -- Nave (azul claro)
-    local nx, ny = self.nave:getPosition()
+    -- player_ship (azul claro)
+    local nx, ny = self.player_ship:getPosition()
     love.graphics.setColor(0.4, 0.7, 1)
     love.graphics.rectangle('line', nx-15, ny-15, 30, 30)
 
-    -- Tiros do jogador (laranja)
+    -- player_projectile do jogador (laranja)
     love.graphics.setColor(1, 0.5, 0)
-    for _, t in ipairs(self.tiros) do
+    for _, t in ipairs(self.player_projectile) do
         local tx, ty = t.collider:getPosition()
         love.graphics.rectangle('line', tx-6, ty-3, 12, 6)
     end
 
-    -- Inimigos (verde claro)
+    -- enemies (verde claro)
     love.graphics.setColor(0.3, 1, 0.3)
-    for _, e in ipairs(self.inimigos) do
+    for _, e in ipairs(self.enemies) do
         local ex, ey = e.collider:getPosition()
         love.graphics.rectangle('line', ex-15, ey-15, 30, 30)
     end
 
-    -- Tiros dos inimigos (laranja)
+    -- player_projectile dos enemies (laranja)
     love.graphics.setColor(1, 0.5, 0)
-    for _, t in ipairs(self.tiros_inimigos) do
+    for _, t in ipairs(self.enemy_projectile) do
         local tx, ty = t.collider:getPosition()
         love.graphics.rectangle('line', tx-6, ty-3, 12, 6)
     end

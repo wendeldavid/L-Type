@@ -7,11 +7,20 @@ function Enemy:new(world, x, y)
     obj.collider:setType('dynamic')
     obj.speed = 80
     obj.shoot_timer = 0
+    obj.shoot_interval = math.random(2, 7)
     return obj
 end
 
 function Enemy:update(dt)
     self.collider:setX(self.collider:getX() - self.speed * dt)
+    self.shoot_timer = self.shoot_timer + dt
+end
+function Enemy:canShoot()
+    return self.shoot_timer >= self.shoot_interval
+end
+function Enemy:resetShootTimer()
+    self.shoot_timer = 0
+    self.shoot_interval = math.random(2, 7)
 end
 
 function Enemy:draw()

@@ -22,13 +22,24 @@ end
 function game:update(dt)
     self.player:update(dt, require('controls'))
     for i = #self.enemies, 1, -1 do
-        self.enemies[i]:update(dt)
-        if self.enemies[i].collider:getX() + 15 < 0 then
-            self.enemies[i].collider:destroy()
+        local enemy = self.enemies[i]
+        enemy:update(dt)
+        -- Disparo do inimigo
+        if enemy:canShoot() then
+            local ex, ey = enemy.collider:getPosition()
+            local bullet = {}
+            bullet.collider = self.world:newRectangleCollider(ex-15, ey-3, 12, 6)
+            bullet.collider:setType('dynamic')
+            bullet.speed = 180
+            table.insert(self.enemy_bullets, bullet)
+            enemy:resetShootTimer()
+        end
+        if enemy.collider:getX() + 15 < 0 then
+            enemy.collider:destroy()
             table.remove(self.enemies, i)
         end
     end
-    -- Spawn de inimigos
+    -- Spawn de enemies
     self.spawn_timer = self.spawn_timer + dt
     if self.spawn_timer >= self.spawn_interval then
         self.spawn_timer = 0
