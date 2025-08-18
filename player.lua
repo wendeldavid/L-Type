@@ -6,8 +6,10 @@ function Player:new(world, x, y)
     obj.collider = world:newRectangleCollider(x, y, 30, 30)
     obj.collider:setType('dynamic')
     obj.collider:setFixedRotation(true) -- Garantir que o collider não gire
+    obj.collider:setCollisionClass('Player') -- Configuração da classe de colisão do jogador
     obj.speed = 200
     obj.projectiles = {}
+    obj.world = world -- Armazenar referência ao mundo para criar colisores de projéteis
     return obj
 end
 
@@ -18,6 +20,13 @@ function Player:shoot()
         y = py,
         speed = 300 -- Velocidade do projétil
     }
+
+    -- Configurar UserData para projéteis do jogador
+    projectile.collider = self.world:newRectangleCollider(px + 15, py, 10, 4)
+    projectile.collider:setType('dynamic')
+    projectile.collider:setCollisionClass('PlayerProjectile')
+    projectile.collider:setUserData({collision_class = 'PlayerProjectile'})
+
     table.insert(self.projectiles, projectile)
 end
 
@@ -45,7 +54,20 @@ function Player:update(dt)
     if self:isMovingRight() then vx = self.speed end
 
     self.collider:setLinearVelocity(vx, vy)
+
+    -- Impedir que o jogador saia da janela
     local px, py = self.collider:getPosition()
+    if px < 15 then
+        self.collider:setX(15)
+    elseif px > 640 - 15 then
+        self.collider:setX(640 - 15)
+    end
+
+    if py < 15 then
+        self.collider:setY(15)
+    elseif py > 480 - 15 then
+        self.collider:setY(480 - 15)
+    end
 
     -- Atualizar projéteis
     for i = #self.projectiles, 1, -1 do

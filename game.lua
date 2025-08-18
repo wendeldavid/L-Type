@@ -19,17 +19,12 @@ function game:enter()
     -- Definir classes de colisão
     self.world:addCollisionClass('Player')
     self.world:addCollisionClass('Enemy', {ignores = {'Enemy'}}) -- Inimigos não colidem entre si
-    self.world:addCollisionClass('PlayerProjectile')
-    self.world:addCollisionClass('EnemyProjectile') -- Adicionada classe de colisão para projéteis inimigos
+    self.world:addCollisionClass('PlayerProjectile', {ignores = {'Player'}}) -- Projéteis do jogador ignoram o jogador
 
     self.player = Player:new(self.world, 50, 480/2 - 15)
-    self.player.collider:setCollisionClass('Player') -- Configuração da classe de colisão do jogador
     self.enemies = {}
-    self.player_bullets = {}
-    self.enemy_bullets = {}
     self.spawn_timer = 0
     self.spawn_interval = 2
-    self.enemy_shoot_interval = 5
 
     -- Callback de colisão
     self.world:setCallbacks(
@@ -37,12 +32,28 @@ function game:enter()
             local aClass = a:getUserData() and a:getUserData().collision_class
             local bClass = b:getUserData() and b:getUserData().collision_class
 
-            -- print("Collision detected between:", aClass, bClass)
+            print("Collision detected between:", aClass, bClass)
 
             if (aClass == 'Player' and bClass == 'Enemy') or
                (aClass == 'Enemy' and bClass == 'Player') then
                 print("Player collided with Enemy")
                 Gamestate.switch(game_over) -- Mudar para o estado de Game Over
+            end
+
+            -- Callback de colisão para projéteis do jogador e inimigos
+            if (aClass == 'PlayerProjectile' and bClass == 'Enemy') or
+               (aClass == 'Enemy' and bClass == 'PlayerProjectile') then
+                print("Player projectile hit an enemy")
+                a:destroy()
+                b:destroy()
+                -- Remover inimigos corretamente após a colisão
+                for i = #self.enemies, 1, -1 do
+                    if self.enemies[i].collider == a or self.enemies[i].collider == b then
+                        self.enemies[i].collider:destroy()
+                        table.remove(self.enemies, i)
+                        break
+                    end
+                end
             end
         end
     )
@@ -88,7 +99,7 @@ function game:update(dt)
             local fixtures = body:getFixtures()
             if fixtures and #fixtures > 0 then
                 local collider = fixtures[1]:getUserData()
-                if collider and collider.collisionEventsClear then
+                if collider and type(collider.collisionEventsClear) == 'function' then
                     collider:collisionEventsClear()
                 end
             end
@@ -99,60 +110,21 @@ function game:update(dt)
     self.player:update(dt)
     self:updateParticles(dt) -- Atualizar partículas
 
-    for i = #self.enemy_bullets, 1, -1 do
-        local bullet = self.enemy_bullets[i]
-        if bullet.collider:isDestroyed() then
-            table.remove(self.enemy_bullets, i)
-        end
-    end
-
-    for i = #self.player_bullets, 1, -1 do
-        local bullet = self.player_bullets[i]
-        if bullet.collider:isDestroyed() then
-            table.remove(self.player_bullets, i)
-        else
-            bullet.collider:setCollisionClass('PlayerProjectile')
-        end
-    end
-
     for i = #self.enemies, 1, -1 do
         local enemy = self.enemies[i]
         if enemy.collider:isDestroyed() then
             table.remove(self.enemies, i)
         else
-            enemy.collider:setCollisionClass('Enemy')
+            enemy:update(dt)
         end
     end
 
-    for i = #self.enemies, 1, -1 do
-        local enemy = self.enemies[i]
-        enemy:update(dt)
-        -- Disparo do inimigo com intervalo variável
-        if enemy:canShoot() then
-            local ex, ey = enemy.collider:getPosition()
-            local bullet = {}
-            bullet.collider = self.world:newRectangleCollider(ex-15, ey-3, 12, 6)
-            bullet.collider:setType('dynamic')
-            bullet.collider:setCollisionClass('EnemyProjectile')
-            bullet.speed = 180
-            table.insert(self.enemy_bullets, bullet)
-            enemy:resetShootTimer(math.random(1, 6)) -- Intervalo variável entre 1 e 6 segundos
-        end
-        if enemy.collider:getX() + 15 < 0 then
-            enemy.collider:destroy()
-            table.remove(self.enemies, i)
-        end
-    end
     -- Spawn de enemies
     self.spawn_timer = self.spawn_timer + dt
     if self.spawn_timer >= self.spawn_interval then
         self.spawn_timer = 0
         local iy = math.random(15, 480-15)
         table.insert(self.enemies, Enemy:new(self.world, 640-40, iy))
-    end
-
-    for _, enemy in ipairs(self.enemies) do
-        enemy.collider:setCollisionClass('Enemy') -- Configuração da classe de colisão dos inimigos
     end
 end
 

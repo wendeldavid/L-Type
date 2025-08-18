@@ -1,3 +1,7 @@
+if os.getenv("LOCAL_LUA_DEBUGGER_VSCODE") then
+    require("lldebugger").start()
+end
+
 local width, height = 640, 480
 local Gamestate = require 'libs.hump.gamestate'
 
@@ -17,4 +21,3 @@ function love.load()
     Gamestate.registerEvents()
     Gamestate.switch(menu)
 end
-
