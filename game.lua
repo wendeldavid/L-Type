@@ -7,6 +7,14 @@ local game_over = require 'game_over' -- Importar o estado de Game Over
 
 local game = {}
 
+-- Variáveis para efeito de flash
+game.flash_active = false
+game.flash_timer = 0
+game.flash_count = 0
+game.flash_max = 3
+game.flash_interval = 0.15 -- 3 flashes em ~0.45s
+game.flash_on = false
+
 function game:enter()
     self.world = wf.newWorld(0, 0, true)
     self.world:setQueryDebugDrawing(false)
@@ -49,9 +57,15 @@ game.beginContact = function(a, b, coll)
 
     if (aClass == 'EnemyProjectile' and bClass == 'Player') or
         (aClass == 'Player' and bClass == 'EnemyProjectile') then
-        -- Lógica de colisão entre jogador e inimigo
+        -- Lógica de colisão entre jogador e projétil inimigo
         print("player levou dano")
-        Gamestate.switch(game_over) -- Mudar para o estado de Game Over
+        if not game.flash_active then
+            game.flash_active = true
+            game.flash_timer = 0
+            game.flash_count = 0
+            game.flash_on = false
+        end
+        -- Gamestate.switch(game_over) -- Remova ou comente para não trocar de estado imediatamente
         return
     end
 
@@ -66,6 +80,21 @@ game.beginContact = function(a, b, coll)
 end
 
 function game:update(dt)
+    -- Controle do efeito de flash
+    if self.flash_active then
+        self.flash_timer = self.flash_timer + dt
+        if self.flash_timer >= self.flash_interval then
+            self.flash_timer = self.flash_timer - self.flash_interval
+            self.flash_on = not self.flash_on
+            if self.flash_on then
+                self.flash_count = self.flash_count + 1
+                if self.flash_count >= self.flash_max then
+                    self.flash_active = false
+                    self.flash_on = false
+                end
+            end
+        end
+    end
 
     self.world:update(dt) -- Atualizar o mundo de física
     self.player:update(dt)
@@ -140,6 +169,13 @@ function game:updateParticles(dt)
 end
 
 function game:draw()
+    -- Efeito de flash na tela
+    if self.flash_on then
+        love.graphics.clear(1, 1, 1) -- Branco
+    else
+        love.graphics.clear(0, 0, 0) -- Preto padrão
+    end
+
     -- Desenhar partículas
     love.graphics.setColor(1, 1, 1)
     for _, p in ipairs(self.particles) do
