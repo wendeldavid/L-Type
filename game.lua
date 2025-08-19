@@ -20,20 +20,12 @@ function game:enter()
     self.world:addCollisionClass('Player')
     self.world:addCollisionClass('Enemy', {ignores = {'Enemy'}}) -- Inimigos não colidem entre si
     self.world:addCollisionClass('PlayerProjectile', {ignores = {'Player'}}) -- Projéteis do jogador ignoram o jogador
+    self.world:addCollisionClass('EnemyProjectile', {ignores = {'Enemy', 'EnemyProjectile'}}) -- Projéteis inimigos não colidem entre si nem com outros inimigos
 
     self.player = Player:new(self.world, 50, 480/2 - 15)
     self.enemies = {}
     self.spawn_timer = 0
     self.spawn_interval = 2
-
-    -- -- Certificar que os colliders têm UserData configurado corretamente
-    -- self.player.collider:setUserData({collision_class = 'Player'})
-    -- for _, enemy in ipairs(self.enemies) do
-    --     enemy.collider:setUserData({collision_class = 'Enemy'})
-    -- end
-    -- for _, bullet in ipairs(self.player.projectiles) do
-    --     bullet.collider:setUserData({collision_class = 'PlayerProjectile'})
-    -- end
 
     -- Callback de colisão seguro
     self.world:setCallbacks(game.beginContact)
@@ -51,6 +43,14 @@ game.beginContact = function(a, b, coll)
     if (aClass == 'Player' and bClass == 'Enemy') or
         (aClass == 'Enemy' and bClass == 'Player') then
         -- Lógica de colisão entre jogador e inimigo
+        Gamestate.switch(game_over) -- Mudar para o estado de Game Over
+        return
+    end
+
+    if (aClass == 'EnemyProjectile' and bClass == 'Player') or
+        (aClass == 'Player' and bClass == 'EnemyProjectile') then
+        -- Lógica de colisão entre jogador e inimigo
+        print("player levou dano")
         Gamestate.switch(game_over) -- Mudar para o estado de Game Over
         return
     end
@@ -87,6 +87,21 @@ function game:update(dt)
         self.spawn_timer = 0
         local iy = math.random(15, 480-15)
         table.insert(self.enemies, Enemy:new(self.world, 640-40, iy))
+    end
+
+    -- Atualizar inimigos e disparar projéteis (controle agora está em enemy.lua)
+    for i = #self.enemies, 1, -1 do
+        local enemy = self.enemies[i]
+        if enemy.collider and enemy.collider:isDestroyed() then
+            table.remove(self.enemies, i)
+        else
+            enemy.shoot_timer = (enemy.shoot_timer or 0) + dt
+            enemy:update(dt)
+            if enemy.shoot_timer >= 2 then
+                enemy.shoot_timer = 0
+                enemy:shootAtPlayer(self.player)
+            end
+        end
     end
 
     self:updateParticles(dt) -- Atualizar partículas
@@ -135,6 +150,7 @@ function game:draw()
     for _, e in ipairs(self.enemies) do
         e:draw()
     end
+
 end
 
 return game
