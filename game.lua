@@ -26,37 +26,80 @@ function game:enter()
     self.spawn_timer = 0
     self.spawn_interval = 2
 
-    -- Callback de colisão
-    self.world:setCallbacks(
-        function(a, b, coll)
-            local aClass = a:getUserData() and a:getUserData().collision_class
-            local bClass = b:getUserData() and b:getUserData().collision_class
+    -- -- Certificar que os colliders têm UserData configurado corretamente
+    -- self.player.collider:setUserData({collision_class = 'Player'})
+    -- for _, enemy in ipairs(self.enemies) do
+    --     enemy.collider:setUserData({collision_class = 'Enemy'})
+    -- end
+    -- for _, bullet in ipairs(self.player.projectiles) do
+    --     bullet.collider:setUserData({collision_class = 'PlayerProjectile'})
+    -- end
 
-            print("Collision detected between:", aClass, bClass)
+    -- Callback de colisão seguro
+    self.world:setCallbacks(game.beginContact)
+end
 
-            if (aClass == 'Player' and bClass == 'Enemy') or
-               (aClass == 'Enemy' and bClass == 'Player') then
-                print("Player collided with Enemy")
-                Gamestate.switch(game_over) -- Mudar para o estado de Game Over
-            end
+game.beginContact = function(a, b, coll)
+    local aUserData = a and type(a.getUserData) == 'function' and a:getUserData() or nil
+    local bUserData = b and type(b.getUserData) == 'function' and b:getUserData() or nil
 
-            -- Callback de colisão para projéteis do jogador e inimigos
-            if (aClass == 'PlayerProjectile' and bClass == 'Enemy') or
-               (aClass == 'Enemy' and bClass == 'PlayerProjectile') then
-                print("Player projectile hit an enemy")
-                a:destroy()
-                b:destroy()
-                -- Remover inimigos corretamente após a colisão
-                for i = #self.enemies, 1, -1 do
-                    if self.enemies[i].collider == a or self.enemies[i].collider == b then
-                        self.enemies[i].collider:destroy()
-                        table.remove(self.enemies, i)
-                        break
-                    end
-                end
-            end
+    local aClass = aUserData and aUserData.collision_class
+    local bClass = bUserData and bUserData.collision_class
+
+    print("Colisão detectada: %s - %s", aClass, bClass)
+
+    if (aClass == 'Player' and bClass == 'Enemy') or
+        (aClass == 'Enemy' and bClass == 'Player') then
+        -- Lógica de colisão entre jogador e inimigo
+        Gamestate.switch(game_over) -- Mudar para o estado de Game Over
+        return
+    end
+
+    -- Exemplo: detectar colisão entre projétil do jogador e inimigo
+    if (aClass == 'PlayerProjectile' and bClass == 'Enemy') or
+        (aClass == 'Enemy' and bClass == 'PlayerProjectile') then
+        -- Marcar ambos para destruição, ou lidar com lógica de dano
+        aUserData:destroy()
+        bUserData:destroy()
+        return
+    end
+end
+
+function game:update(dt)
+
+    self.world:update(dt) -- Atualizar o mundo de física
+    self.player:update(dt)
+
+    -- limpa memoria de inimigos destruidos
+    for i = #self.enemies, 1, -1 do
+        local enemy = self.enemies[i]
+        if enemy.collider:isDestroyed() then
+            print('inimigo destruido: %s', enemy)
+            table.remove(self.enemies, i)
+        else
+            enemy:update(dt)
         end
-    )
+    end
+
+    -- Spawn de enemies
+    self.spawn_timer = self.spawn_timer + dt
+    if self.spawn_timer >= self.spawn_interval then
+        self.spawn_timer = 0
+        local iy = math.random(15, 480-15)
+        table.insert(self.enemies, Enemy:new(self.world, 640-40, iy))
+    end
+
+    self:updateParticles(dt) -- Atualizar partículas
+end
+
+function game:keypressed(key)
+    if key == 'escape' then
+        Gamestate.switch(require('menu'))
+    elseif key == 'p' then
+        Gamestate.push(paused)
+    else
+        self.player:keypressed(key)
+    end
 end
 
 function game:updateParticles(dt)
@@ -78,63 +121,6 @@ function game:updateParticles(dt)
         if p.x + p.size < 0 then
             table.remove(self.particles, i)
         end
-    end
-end
-
-function game:update(dt)
-    -- Garantir que eventos de colisão sejam limpos corretamente
-    if self.world.collisionEvents then
-        for i = #self.world.collisionEvents, 1, -1 do
-            local event = self.world.collisionEvents[i]
-            if not event.colliderA or not event.colliderB or 
-               event.colliderA:isDestroyed() or event.colliderB:isDestroyed() then
-                table.remove(self.world.collisionEvents, i)
-            end
-        end
-    end
-
-    -- Garantir que colliders sejam válidos antes de atualizar o mundo
-    if self.world and self.world.getBodies then
-        for _, body in ipairs(self.world:getBodies()) do
-            local fixtures = body:getFixtures()
-            if fixtures and #fixtures > 0 then
-                local collider = fixtures[1]:getUserData()
-                if collider and type(collider.collisionEventsClear) == 'function' then
-                    collider:collisionEventsClear()
-                end
-            end
-        end
-    end
-
-    self.world:update(dt) -- Atualizar o mundo de física
-    self.player:update(dt)
-    self:updateParticles(dt) -- Atualizar partículas
-
-    for i = #self.enemies, 1, -1 do
-        local enemy = self.enemies[i]
-        if enemy.collider:isDestroyed() then
-            table.remove(self.enemies, i)
-        else
-            enemy:update(dt)
-        end
-    end
-
-    -- Spawn de enemies
-    self.spawn_timer = self.spawn_timer + dt
-    if self.spawn_timer >= self.spawn_interval then
-        self.spawn_timer = 0
-        local iy = math.random(15, 480-15)
-        table.insert(self.enemies, Enemy:new(self.world, 640-40, iy))
-    end
-end
-
-function game:keypressed(key)
-    if key == 'escape' then
-        Gamestate.switch(require('menu'))
-    elseif key == 'p' then
-        Gamestate.push(paused)
-    else
-        self.player:keypressed(key)
     end
 end
 

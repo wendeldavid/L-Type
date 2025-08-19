@@ -72,8 +72,14 @@ function Player:update(dt)
     -- Atualizar projéteis
     for i = #self.projectiles, 1, -1 do
         local proj = self.projectiles[i]
-        proj.x = proj.x + proj.speed * dt
-        if proj.x > 640 then -- Remover projéteis que saem da tela
+        if proj.collider and not proj.collider:isDestroyed() then
+            proj.collider:setX(proj.collider:getX() + proj.speed * dt)
+            -- Remove projétil se sair da tela
+            if proj.collider:getX() > 640 then
+                proj.collider:destroy()
+                table.remove(self.projectiles, i)
+            end
+        else
             table.remove(self.projectiles, i)
         end
     end
@@ -87,7 +93,10 @@ function Player:draw()
     -- Desenhar projéteis
     love.graphics.setColor(1, 0.5, 0)
     for _, proj in ipairs(self.projectiles) do
-        love.graphics.rectangle('fill', proj.x, proj.y - 2, 10, 4)
+        if proj.collider and not proj.collider:isDestroyed() then
+            local x, y = proj.collider:getPosition()
+            love.graphics.rectangle('fill', x, y - 2, 10, 4)
+        end
     end
 end
 

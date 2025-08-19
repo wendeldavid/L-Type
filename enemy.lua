@@ -5,7 +5,9 @@ function Enemy:new(world, x, y)
     local obj = setmetatable({}, self)
     obj.collider = world:newRectangleCollider(x, y, 30, 30)
     obj.collider:setType('dynamic')
+    obj.collider:setFixedRotation(true) -- Garantir que o collider não gire
     obj.collider:setCollisionClass('Enemy') -- Configuração da classe de colisão dos inimigos
+    obj.collider:setUserData({collision_class = 'Enemy'})
     obj.speed = 80
     return obj
 end
