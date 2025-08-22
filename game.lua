@@ -6,6 +6,7 @@ local paused = require 'paused'
 local game_over = require 'game_over' -- Importar o estado de Game Over
 
 local game = {}
+game.score = 0
 
 -- Variáveis para efeito de flash
 game.flash_active = false
@@ -75,6 +76,8 @@ game.beginContact = function(a, b, coll)
         -- Marcar ambos para destruição, ou lidar com lógica de dano
         aUserData:destroy()
         bUserData:destroy()
+        game.score = game.score + 1
+        print('Score:', game.score)
         return
     end
 end
@@ -181,6 +184,14 @@ function game:draw()
     for _, p in ipairs(self.particles) do
         love.graphics.circle('fill', p.x, p.y, p.size)
     end
+
+
+    -- Exibir score
+    love.graphics.setColor(1, 1, 1)
+    local scoreText = 'Score: ' .. tostring(self.score)
+    local sw = love.graphics.getWidth()
+    local fw = love.graphics.getFont():getWidth(scoreText)
+    love.graphics.print(scoreText, sw - fw - 10, 10)
 
     self.player:draw()
     for _, e in ipairs(self.enemies) do

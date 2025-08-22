@@ -8,7 +8,7 @@ function Enemy:new(world, x, y)
     obj.collider:setFixedRotation(true) -- Garantir que o collider não gire
     obj.collider:setCollisionClass('Enemy') -- Configuração da classe de colisão dos inimigos
     obj.collider:setUserData({collision_class = 'Enemy'})
-    obj.speed = 80
+    obj.speed = 40
     obj.projectiles = {} -- Tabela para armazenar os projéteis
     return obj
 end
