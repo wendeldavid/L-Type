@@ -42,10 +42,10 @@ function menu:draw()
 end
 
 function menu:keypressed(key)
-    if key == 'up' then
+    if key == 'up' or key == 'w' then
         self.selected = self.selected - 1
         if self.selected < 1 then self.selected = 3 end
-    elseif key == 'down' then
+    elseif key == 'down' or key == 's' then
         self.selected = self.selected + 1
         if self.selected > 3 then self.selected = 1 end
     elseif key == 'return' or key == 'kpenter' then
