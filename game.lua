@@ -4,8 +4,15 @@ local Player = require 'player'
 local Enemy = require 'enemy'
 local paused = require 'paused'
 local game_over = require 'game_over' -- Importar o estado de Game Over
+local finished = require 'finished'
 
 local game = {}
+local music
+local music_files = {
+    'assets/st/Metal Storm.mp3',
+    'assets/st/Infernal Machinery.mp3',
+    'assets/st/Infernal Machinery (1).mp3'
+}
 game.score = 0
 
 -- Variáveis para efeito de flash
@@ -17,6 +24,18 @@ game.flash_interval = 0.15 -- 3 flashes em ~0.45s
 game.flash_on = false
 
 function game:enter()
+    if music and music:isPlaying() then
+        music:stop()
+    end
+    local idx = love.math.random(1, #music_files)
+    music = love.audio.newSource(music_files[idx], 'stream')
+    music:setLooping(true)
+    music:play()
+function game:leave()
+    if music and music:isPlaying() then
+        music:stop()
+    end
+end
     self.world = wf.newWorld(0, 0, true)
     self.world:setQueryDebugDrawing(false)
 
@@ -83,6 +102,10 @@ game.beginContact = function(a, b, coll)
 end
 
 function game:update(dt)
+
+    self.world:update(dt) -- Atualizar o mundo de física
+    self.player:update(dt)
+
     -- Controle do efeito de flash
     if self.flash_active then
         self.flash_timer = self.flash_timer + dt
@@ -99,8 +122,11 @@ function game:update(dt)
         end
     end
 
-    self.world:update(dt) -- Atualizar o mundo de física
-    self.player:update(dt)
+    -- Troca para estado finished ao atingir score 10
+    if self.score and self.score >= 3 then
+        Gamestate.switch(finished)
+        return
+    end
 
     -- limpa memoria de inimigos destruidos
     for i = #self.enemies, 1, -1 do

@@ -1,6 +1,21 @@
 local Gamestate = require 'libs.hump.gamestate'
 
 local menu = {selected = 1}
+local music
+function menu:enter()
+    if not music then
+        music = love.audio.newSource('assets/st/main_menu.mp3', 'stream')
+        music:setLooping(true)
+    end
+    if not music:isPlaying() then
+        music:play()
+    end
+end
+function menu:leave()
+    if music and music:isPlaying() then
+        music:stop()
+    end
+end
 
 function menu:draw()
     love.graphics.setColor(1,1,1)
