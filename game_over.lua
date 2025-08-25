@@ -2,8 +2,11 @@ local Gamestate = require 'libs.hump.gamestate'
 
 local game_over = {}
 
+local font = love.graphics.newFont('assets/fonts/starkwalker_classic/StarkwalkerClassic.otf', 32)
+
 function game_over:draw()
-    love.graphics.setColor(1, 1, 1)
+    love.graphics.setFont(font)
+    love.graphics.setColor(1, 0.2, 0.2)
     love.graphics.printf("Game Over\nPress 'Return' to go back to the menu", 0, 480 / 2 - 20, 640, 'center')
 end
 

@@ -3,6 +3,8 @@ local Gamestate = require 'libs.hump.gamestate'
 local finished = {}
 
 function finished:draw()
+    local menuFont = love.graphics.newFont('assets/fonts/starkwalker_classic/StarkwalkerClassic.otf', 32)
+    love.graphics.setFont(menuFont)
     love.graphics.setColor(1, 1, 1)
     love.graphics.printf('parabéns', 0, love.graphics.getHeight()/2 - 20, love.graphics.getWidth(), 'center')
 end

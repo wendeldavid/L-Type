@@ -2,6 +2,7 @@ local Gamestate = require 'libs.hump.gamestate'
 
 local menu = {selected = 1}
 local music
+
 function menu:enter()
     if not music then
         music = love.audio.newSource('assets/st/main_menu.mp3', 'stream')
@@ -18,8 +19,16 @@ function menu:leave()
 end
 
 function menu:draw()
-    love.graphics.setColor(1,1,1)
-    love.graphics.printf("L-TYPE", 0, 480/2-80, 640, 'center')
+    local oldFont = love.graphics.getFont()
+
+    local menuTitleFont = love.graphics.newFont('assets/fonts/starkwalker_classic/StarkwalkerClassic.otf', 64)
+    love.graphics.setFont(menuTitleFont)
+    love.graphics.setColor(0.2, 0.2, 1)
+    love.graphics.printf("L-TYPE", 0, 480/2-150, 640, 'center')
+
+    local menuFont = love.graphics.newFont('assets/fonts/starkwalker_classic/StarkwalkerClassic.otf', 32)
+    love.graphics.setFont(menuFont)
+
     local items = {"Play", "Options", "Credits"}
     for i, item in ipairs(items) do
         if self.selected == i then
@@ -29,6 +38,7 @@ function menu:draw()
         end
         love.graphics.printf(item, 0, 480/2-20 + (i-1)*40, 640, 'center')
     end
+    love.graphics.setFont(oldFont)
 end
 
 function menu:keypressed(key)
