@@ -1,7 +1,8 @@
 # Makefile para empacotar arquivos .lua e pastas específicas
 
+
 ZIP_NAME=L-Type.love
-FOLDERS=libs
+FOLDERS=libs assets
 LUA_FILES=$(wildcard *.lua)
 
 package:
