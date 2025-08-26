@@ -21,3 +21,15 @@ function love.load()
     Gamestate.registerEvents()
     Gamestate.switch(menu)
 end
+-- Lê o arquivo build.type e define build_type global
+local function load_build_type()
+    local f = io.open("build.type", "r")
+    if f then
+        local t = f:read("*l")
+        f:close()
+        return t or "desktop"
+    end
+    return "desktop"
+end
+
+BUILD_TYPE = load_build_type()
