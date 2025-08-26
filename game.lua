@@ -46,14 +46,15 @@ end
 
     -- Definir classes de colisão
     self.world:addCollisionClass('Player')
-    self.world:addCollisionClass('Enemy', {ignores = {'Enemy'}}) -- Inimigos não colidem entre si
-    self.world:addCollisionClass('PlayerProjectile', {ignores = {'Player'}}) -- Projéteis do jogador ignoram o jogador
-    self.world:addCollisionClass('EnemyProjectile', {ignores = {'Enemy', 'EnemyProjectile'}}) -- Projéteis inimigos não colidem entre si nem com outros inimigos
+    self.world:addCollisionClass('Enemy', {ignores = {'Enemy'}})
+    self.world:addCollisionClass('PlayerProjectile', {ignores = {'Player'}})
+    self.world:addCollisionClass('EnemyProjectile', {ignores = {'Enemy', 'EnemyProjectile'}})
+    self.world:addCollisionClass('Repeller', {ignores = {'Player', 'PlayerProjectile'}})
 
     self.player = Player:new(self.world, 50, 480/2 - 15)
     self.enemies = {}
     self.spawn_timer = 0
-    self.spawn_interval = 2
+    self.spawn_interval = 6
 
     -- Callback de colisão seguro
     self.world:setCallbacks(game.beginContact)
@@ -66,26 +67,32 @@ game.beginContact = function(a, b, coll)
     local aClass = aUserData and aUserData.collision_class
     local bClass = bUserData and bUserData.collision_class
 
-    print("Colisão detectada: %s - %s", aClass, bClass)
-
     if (aClass == 'Player' and bClass == 'Enemy') or
         (aClass == 'Enemy' and bClass == 'Player') then
-        -- Lógica de colisão entre jogador e inimigo
-        Gamestate.switch(game_over) -- Mudar para o estado de Game Over
+        -- Marcar para trocar para o estado de Game Over
+        game._switch_to_game_over = true
         return
     end
 
     if (aClass == 'EnemyProjectile' and bClass == 'Player') or
         (aClass == 'Player' and bClass == 'EnemyProjectile') then
         -- Lógica de colisão entre jogador e projétil inimigo
-        print("player levou dano")
+        if aClass == 'EnemyProjectile' and a and type(a.getUserData) == 'function' then
+            local ud = a:getUserData() or {}
+            ud._to_destroy = true
+            a:setUserData(ud)
+        elseif bClass == 'EnemyProjectile' and b and type(b.getUserData) == 'function' then
+            local ud = b:getUserData() or {}
+            ud._to_destroy = true
+            b:setUserData(ud)
+        end
+
         if not game.flash_active then
             game.flash_active = true
             game.flash_timer = 0
             game.flash_count = 0
             game.flash_on = false
         end
-        -- Gamestate.switch(game_over) -- Remova ou comente para não trocar de estado imediatamente
         return
     end
 
@@ -96,15 +103,57 @@ game.beginContact = function(a, b, coll)
         aUserData:destroy()
         bUserData:destroy()
         game.score = game.score + 1
-        print('Score:', game.score)
+        return
+    end
+
+    -- Ricochete: EnemyProjectile colide com Repeller
+    if (aClass == 'EnemyProjectile' and bClass == 'Repeller') or (aClass == 'Repeller' and bClass == 'EnemyProjectile') then
+        local projCollider = (aClass == 'EnemyProjectile') and a or b
+        if type(projCollider.getLinearVelocity) == 'function' and type(projCollider.setLinearVelocity) == 'function' then
+            local vx, vy = projCollider:getLinearVelocity()
+            local nx, ny = coll:getNormal()
+            -- Normalizar a normal
+            local nlen = math.sqrt(nx*nx + ny*ny)
+            if nlen > 0 then nx, ny = nx/nlen, ny/nlen end
+            -- Calcular vetor refletido (ricochete)
+            local dot = vx * nx + vy * ny
+            local rvx = vx - 2 * dot * nx
+            local rvy = vy - 2 * dot * ny
+            -- Manter módulo da velocidade original
+            local speed = math.sqrt(vx*vx + vy*vy)
+            local rlen = math.sqrt(rvx*rvx + rvy*rvy)
+            if rlen > 0 then
+                rvx = rvx / rlen * speed
+                rvy = rvy / rlen * speed
+            end
+            -- projCollider:setLinearVelocity(rvx, rvy)
+            projCollider:destroy() -- Destruir o projétil ao invés de ricochetear
+        end
         return
     end
 end
 
 function game:update(dt)
-
     self.world:update(dt) -- Atualizar o mundo de física
     self.player:update(dt)
+
+    -- Destruir projéteis inimigos marcados para destruição (seguro fora do callback)
+    for _, enemy in ipairs(self.enemies) do
+        if enemy.projectiles then
+            for i = #enemy.projectiles, 1, -1 do
+                local proj = enemy.projectiles[i]
+                if proj.collider and type(proj.collider.getUserData) == 'function' then
+                    local ud = proj.collider:getUserData()
+                    if ud and ud._to_destroy then
+                        proj.collider:destroy()
+                        table.remove(enemy.projectiles, i)
+
+                        game.player.lives = game.player.lives - 1
+                    end
+                end
+            end
+        end
+    end
 
     -- Controle do efeito de flash
     if self.flash_active then
@@ -122,8 +171,24 @@ function game:update(dt)
         end
     end
 
-    -- Troca para estado finished ao atingir score 10
+    -- Verifica se o jogador perdeu todas as vidas
+    if game.player.lives <= 0 then
+        Gamestate.switch(game_over)
+    end
+
+    -- Troca para estado finished ao atingir score 3
     if self.score and self.score >= 3 then
+        self._switch_to_finished = true
+    end
+
+    -- Troca de estado (Game Over ou Finished) fora do callback
+    if self._switch_to_game_over then
+        self._switch_to_game_over = false
+        Gamestate.switch(game_over)
+        return
+    end
+    if self._switch_to_finished then
+        self._switch_to_finished = false
         Gamestate.switch(finished)
         return
     end
@@ -132,7 +197,6 @@ function game:update(dt)
     for i = #self.enemies, 1, -1 do
         local enemy = self.enemies[i]
         if enemy.collider:isDestroyed() then
-            print('inimigo destruido: %s', enemy)
             table.remove(self.enemies, i)
         else
             enemy:update(dt)
@@ -210,7 +274,6 @@ function game:draw()
     for _, p in ipairs(self.particles) do
         love.graphics.circle('fill', p.x, p.y, p.size)
     end
-
 
     -- Exibir score
     love.graphics.setColor(1, 1, 1)

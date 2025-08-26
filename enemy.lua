@@ -8,7 +8,7 @@ function Enemy:new(world, x, y)
     obj.collider:setFixedRotation(true) -- Garantir que o collider não gire
     obj.collider:setCollisionClass('Enemy') -- Configuração da classe de colisão dos inimigos
     obj.collider:setUserData({collision_class = 'Enemy'})
-    obj.speed = 40
+    obj.speed = 20
     obj.projectiles = {} -- Tabela para armazenar os projéteis
     return obj
 end
@@ -30,7 +30,7 @@ function Enemy:shootAtPlayer(player)
     local px, py = player.collider:getPosition()
     local dx, dy = px - ex, py - ey
     local dist = math.sqrt(dx*dx + dy*dy)
-    local speed = 200
+    local speed = 80
     local vx, vy = (dx/dist)*speed, (dy/dist)*speed
     local projectile = {
         collider = self.collider.world:newRectangleCollider(ex, ey, 10, 4),
