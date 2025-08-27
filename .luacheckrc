@@ -1,5 +1,6 @@
 -- Ignore long line warnings
 max_line_length = false
 globals = {
-  "love"
+  "love",
+  "BUILD_TYPE"
 }

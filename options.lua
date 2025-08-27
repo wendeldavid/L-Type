@@ -8,7 +8,7 @@ local getControls = function()
     if BUILD_TYPE == 'portable' then
         return {
             {key = "Direcional ou Analógico esquerdo", action = "Mover a nave"},
-            {key = "Y", action = "Atirar"},
+            {key = "Y/R2", action = "Atirar"},
             {key = "Analógico direito", action = "Direção do escudo defletor"},
             {key = "Start", action = "Menu/Pausa"},
             {key = "Select", action = "Sair do jogo"},
@@ -19,13 +19,15 @@ local getControls = function()
     if BUILD_TYPE == 'pc' then
         return {
             {key = "Setas/WASD", action = "Mover a nave"},
-            {key = "B", action = "Atirar"},
+            {key = "B/Y", action = "Atirar"},
             {key = "Mouse", action = "Direção do escudo defletor"},
             {key = "ESC", action = "Menu/Pausa"},
             {key = "P", action = "Pausar o jogo"},
             {key = "Espaço/Enter", action = "Selecionar no menu"},
         }
     end
+
+    -- TODO touch
 end
 
 function options:draw()

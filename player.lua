@@ -145,7 +145,7 @@ function Player:draw()
 end
 
 function Player:keypressed(key)
-    if key == 'b' then
+    if key == 'b' or key == 'y' then
         self:shoot()
     end
 end

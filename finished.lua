@@ -15,4 +15,8 @@ function finished:keypressed(key)
     end
 end
 
+function finished:leave()
+    -- Limpar referências se necessário
+end
+
 return finished

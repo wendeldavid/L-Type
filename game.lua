@@ -24,6 +24,9 @@ game.flash_interval = 0.15 -- 3 flashes em ~0.45s
 game.flash_on = false
 
 function game:enter()
+    -- Reforçar inicialização de variáveis essenciais
+    self.enemies = {}
+    self.particles = {}
     if music and music:isPlaying() then
         music:stop()
     end
@@ -31,11 +34,7 @@ function game:enter()
     music = love.audio.newSource(music_files[idx], 'stream')
     music:setLooping(true)
     music:play()
-function game:leave()
-    if music and music:isPlaying() then
-        music:stop()
-    end
-end
+
     self.world = wf.newWorld(0, 0, true)
     self.world:setQueryDebugDrawing(false)
 
@@ -134,10 +133,15 @@ game.beginContact = function(a, b, coll)
 end
 
 function game:update(dt)
+    -- Todas as operações abaixo só são executadas se as estruturas essenciais existem
     self.world:update(dt) -- Atualizar o mundo de física
     self.player:update(dt)
 
+    -- Proteger contra update após leave
+    if not self.enemies or not self.player or not self.world then return end
+
     -- Destruir projéteis inimigos marcados para destruição (seguro fora do callback)
+    if not self.enemies then return end
     for _, enemy in ipairs(self.enemies) do
         if enemy.projectiles then
             for i = #enemy.projectiles, 1, -1 do
@@ -194,6 +198,7 @@ function game:update(dt)
     end
 
     -- limpa memoria de inimigos destruidos
+    if not self.enemies then return end
     for i = #self.enemies, 1, -1 do
         local enemy = self.enemies[i]
         if enemy.collider:isDestroyed() then
@@ -212,6 +217,7 @@ function game:update(dt)
     end
 
     -- Atualizar inimigos e disparar projéteis (controle agora está em enemy.lua)
+    if not self.enemies then return end
     for i = #self.enemies, 1, -1 do
         local enemy = self.enemies[i]
         if enemy.collider and enemy.collider:isDestroyed() then
@@ -286,7 +292,24 @@ function game:draw()
     for _, e in ipairs(self.enemies) do
         e:draw()
     end
+end
 
+function game:leave()
+    if music and music:isPlaying() then
+        music:stop()
+    end
+    -- Limpar referências para liberar memória
+    self.world = nil
+    self.player = nil
+    self.enemies = nil
+    self.particles = nil
+    self.score = 0
+    self.flash_active = false
+    self.flash_timer = 0
+    self.flash_count = 0
+    self.flash_on = false
+    self._switch_to_game_over = nil
+    self._switch_to_finished = nil
 end
 
 return game

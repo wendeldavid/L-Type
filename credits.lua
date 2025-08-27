@@ -40,7 +40,8 @@ function credits:draw()
     end
     if can_return then
         love.graphics.setColor(1,1,0.5)
-        love.graphics.printf("Pressione ESC para voltar ao menu", 0, 440, 640, 'center')
+        local key_name = (BUILD_TYPE == 'portable') and 'SELECT' or 'ESC'
+        love.graphics.printf("Pressione " .. key_name .. " para voltar ao menu", 0, 440, 640, 'center')
     end
 end
 
@@ -48,6 +49,10 @@ function credits:keypressed(key)
     if key == 'escape' and can_return then
         Gamestate.switch(require('menu'))
     end
+end
+
+function credits:leave()
+    -- Limpar referências se necessário
 end
 
 return credits

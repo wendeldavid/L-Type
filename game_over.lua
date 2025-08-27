@@ -7,13 +7,18 @@ local font = love.graphics.newFont('assets/fonts/starkwalker_classic/Starkwalker
 function game_over:draw()
     love.graphics.setFont(font)
     love.graphics.setColor(1, 0.2, 0.2)
-    love.graphics.printf("Game Over\nPress 'Start' to go back to the menu", 0, 480 / 2 - 20, 640, 'center')
+    local key_name = (BUILD_TYPE == 'portable') and 'START' or 'ENTER'
+    love.graphics.printf("Fim de Jogo\nPressione '" .. key_name .. "' para voltar ao menu", 0, 480 / 2 - 20, 640, 'center')
 end
 
 function game_over:keypressed(key)
     if key == 'return' then
         Gamestate.switch(require('menu')) -- Voltar ao menu inicial
     end
+end
+
+function game_over:leave()
+    -- Limpar referências se necessário
 end
 
 return game_over
