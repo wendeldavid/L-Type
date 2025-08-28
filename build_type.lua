@@ -1,0 +1,2 @@
+-- portable, pc
+return "portable"
