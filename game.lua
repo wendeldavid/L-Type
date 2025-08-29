@@ -3,7 +3,7 @@ local wf = require 'libs.windfield.windfield'
 local Player = require 'player'
 local Enemy = require 'enemy'
 local paused = require 'paused'
-local game_over = require 'game_over' -- Importar o estado de Game Over
+local game_over = require 'game_over'
 local finished = require 'finished'
 
 local game = {}
@@ -180,8 +180,8 @@ function game:update(dt)
         Gamestate.switch(game_over)
     end
 
-    -- Troca para estado finished ao atingir score 3
-    if self.score and self.score >= 3 then
+    -- Verifica se o jogador alcançou a pontuação para vencer
+    if self.score and self.score >= 10 then
         self._switch_to_finished = true
     end
 
