@@ -1,4 +1,5 @@
--- Variáveis para controle do retângulo giratório
+local animation = require('animations/player_ship')
+
 local Player = {}
 Player.__index = Player
 
@@ -117,9 +118,17 @@ function Player:update(dt)
     end
 end
 
+
 function Player:draw()
     local px, py = self.collider:getPosition()
-    love.graphics.rectangle('line', px-15, py-15, 30, 30)
+
+    -- Desenhar a imagem da nave centralizada e ajustada sobre o player
+    love.graphics.setColor(1, 1, 1)
+
+    local ship_img = animation.sprite
+    local img_w, img_h = ship_img:getWidth(), ship_img:getHeight()
+    -- Ajustar para 30x30 (tamanho do player)
+    love.graphics.draw(ship_img, px, py, 0, 30/img_w, 30/img_h, img_w/2, img_h/2)
 
     -- Desenhar projéteis
     love.graphics.setColor(1, 0.5, 0)
