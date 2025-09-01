@@ -10,6 +10,7 @@ function Enemy:new(world, x, y)
     obj.collider:setUserData({collision_class = 'Enemy'})
     obj.speed = 20
     obj.projectiles = {} -- Tabela para armazenar os projéteis
+    obj.world = world
     return obj
 end
 
@@ -41,6 +42,9 @@ function Enemy:shootAtPlayer(player)
     projectile.collider:setType('dynamic')
     projectile.collider:setCollisionClass('EnemyProjectile')
     projectile.collider:setUserData({collision_class = 'EnemyProjectile'})
+    projectile.collider:setRestitution(0.8)
+    projectile.collider:applyAngularImpulse(5800)
+
     table.insert(self.projectiles, projectile)
 end
 

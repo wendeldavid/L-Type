@@ -104,32 +104,6 @@ game.beginContact = function(a, b, coll)
         game.score = game.score + 1
         return
     end
-
-    -- Ricochete: EnemyProjectile colide com Repeller
-    if (aClass == 'EnemyProjectile' and bClass == 'Repeller') or (aClass == 'Repeller' and bClass == 'EnemyProjectile') then
-        local projCollider = (aClass == 'EnemyProjectile') and a or b
-        if type(projCollider.getLinearVelocity) == 'function' and type(projCollider.setLinearVelocity) == 'function' then
-            local vx, vy = projCollider:getLinearVelocity()
-            local nx, ny = coll:getNormal()
-            -- Normalizar a normal
-            local nlen = math.sqrt(nx*nx + ny*ny)
-            if nlen > 0 then nx, ny = nx/nlen, ny/nlen end
-            -- Calcular vetor refletido (ricochete)
-            local dot = vx * nx + vy * ny
-            local rvx = vx - 2 * dot * nx
-            local rvy = vy - 2 * dot * ny
-            -- Manter módulo da velocidade original
-            local speed = math.sqrt(vx*vx + vy*vy)
-            local rlen = math.sqrt(rvx*rvx + rvy*rvy)
-            if rlen > 0 then
-                rvx = rvx / rlen * speed
-                rvy = rvy / rlen * speed
-            end
-            -- projCollider:setLinearVelocity(rvx, rvy)
-            projCollider:destroy() -- Destruir o projétil ao invés de ricochetear
-        end
-        return
-    end
 end
 
 function game:update(dt)
