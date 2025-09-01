@@ -104,6 +104,24 @@ game.beginContact = function(a, b, coll)
         game.score = game.score + 1
         return
     end
+
+    -- Detectar colisão entre projétil inimigo e repeller
+    if (aClass == 'EnemyProjectile' and bClass == 'Repeller') or (aClass == 'Repeller' and bClass == 'EnemyProjectile') then
+        -- Encontrar o player associado ao repeller
+        local repellerUserData = (aClass == 'Repeller') and aUserData or bUserData
+        if repellerUserData and repellerUserData.parent and repellerUserData.parent.showRepellerOnCollision then
+            repellerUserData.parent:showRepellerOnCollision()
+        end
+        -- Marcar projétil inimigo para destruição
+        if aClass == 'EnemyProjectile' and a and type(a.getUserData) == 'function' then
+            local ud = a:getUserData() or {}
+            a:setUserData(ud)
+        elseif bClass == 'EnemyProjectile' and b and type(b.getUserData) == 'function' then
+            local ud = b:getUserData() or {}
+            b:setUserData(ud)
+        end
+        return
+    end
 end
 
 function game:update(dt)
@@ -217,6 +235,10 @@ function game:keypressed(key)
     else
         self.player:keypressed(key)
     end
+end
+
+function game:keyreleased(key)
+    self.player:keyreleased(key)
 end
 
 function game:updateParticles(dt)

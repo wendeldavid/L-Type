@@ -24,23 +24,38 @@ function Player:new(world, x, y)
     obj.repeller_visible = false
     obj.repeller_timer = 0
     obj._last_angle = 0
+    obj.charging = false
+    obj.charge_timer = 0
+    obj.charge_ready = false
     return obj
 end
 
-function Player:shoot()
+function Player:shoot(isCharged)
     local px, py = self.collider:getPosition()
-    local projectile = {
-        x = px + 15, -- Posição inicial do projétil à frente do jogador
-        y = py,
-        speed = 300 -- Velocidade do projétil
-    }
-
-    -- Configurar UserData para projéteis do jogador
-    projectile.collider = self.world:newRectangleCollider(px + 15, py, 10, 4)
-    projectile.collider:setType('dynamic')
-    projectile.collider:setCollisionClass('PlayerProjectile')
-    projectile.collider:setUserData({collision_class = 'PlayerProjectile'})
-
+    local projectile
+    if isCharged then
+        projectile = {
+            x = px + 15,
+            y = py,
+            speed = 500,
+            charged = true,
+            radius = 18
+        }
+        projectile.collider = self.world:newCircleCollider(px + 15, py, projectile.radius)
+        projectile.collider:setType('dynamic')
+        projectile.collider:setCollisionClass('PlayerProjectile')
+        projectile.collider:setUserData({collision_class = 'PlayerProjectile'})
+    else
+        projectile = {
+            x = px + 15,
+            y = py,
+            speed = 300
+        }
+        projectile.collider = self.world:newRectangleCollider(px + 15, py, 10, 4)
+        projectile.collider:setType('dynamic')
+        projectile.collider:setCollisionClass('PlayerProjectile')
+        projectile.collider:setUserData({collision_class = 'PlayerProjectile'})
+    end
     table.insert(self.projectiles, projectile)
 end
 
@@ -84,6 +99,14 @@ function Player:update(dt)
             end
         else
             table.remove(self.projectiles, i)
+        end
+    end
+
+    -- Controle de carregamento do tiro
+    if self.charging then
+        self.charge_timer = self.charge_timer + dt
+        if self.charge_timer >= 3 then
+            self.charge_ready = true
         end
     end
 
@@ -131,11 +154,26 @@ function Player:draw()
     love.graphics.draw(ship_img, px, py, 0, 30/img_w, 30/img_h, img_w/2, img_h/2)
 
     -- Desenhar projéteis
-    love.graphics.setColor(1, 0.5, 0)
     for _, proj in ipairs(self.projectiles) do
         if proj.collider and not proj.collider:isDestroyed() then
             local x, y = proj.collider:getPosition()
-            love.graphics.rectangle('fill', x, y - 2, 10, 4)
+            if proj.charged then
+                local r = proj.radius or 18
+                -- Círculo principal
+                love.graphics.setColor(0, 1, 1)
+                love.graphics.circle('fill', x, y, r)
+                -- Arco à esquerda (semicírculo)
+                love.graphics.setColor(0, 0.2, 1)
+                love.graphics.arc('fill', x - r * 0.7, y, r * 0.7, math.pi/2, math.pi*3/2)
+                -- Contorno do círculo
+                love.graphics.setColor(1, 0.2, 0.2)
+                love.graphics.setLineWidth(2)
+                love.graphics.circle('line', x, y, r)
+                love.graphics.setLineWidth(1)
+            else
+                love.graphics.setColor(1, 0.7, 0)
+                love.graphics.rectangle('fill', x, y - 2, 10, 4)
+            end
         end
     end
 
@@ -166,7 +204,22 @@ end
 
 function Player:keypressed(key)
     if key == 'b' or key == 'y' then
-        self:shoot()
+        self.charging = true
+        self.charge_timer = 0
+        self.charge_ready = false
+    end
+end
+
+function Player:keyreleased(key)
+    if (key == 'b' or key == 'y') or self.charging then
+        if self.charge_ready then
+            self:shoot(true)
+        else
+            self:shoot(false)
+        end
+        self.charging = false
+        self.charge_timer = 0
+        self.charge_ready = false
     end
 end
 

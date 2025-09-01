@@ -1,5 +1,5 @@
 ZIP_NAME=L-Type.love
-FOLDERS=libs assets
+FOLDERS=libs assets animations
 LUA_FILES=$(wildcard *.lua)
 
 package: clean
