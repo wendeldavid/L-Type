@@ -1,7 +1,7 @@
 local Gamestate = require 'libs.hump.gamestate'
 
 local options = {
-    master_volume = 0.2,
+    master_volume = 0.6,
     music_volume = 1,
     sfx_volume = 1
 }
@@ -53,11 +53,40 @@ function options:draw()
         love.graphics.printf(c.key, x1, y, 380, 'left')
         love.graphics.printf(c.action, x2, y, 460, 'left')
     end
+
+    options:drawVolumeSlider()
+end
+
+function options:drawVolumeSlider()
+    -- Slider de volume
+    local slider_x = 120
+    local slider_y = 400
+    local slider_w = 400
+    local slider_h = 12
+    local handle_radius = 12
+    local value = options.master_volume or 0
+    -- Desenhar trilho
+    love.graphics.setColor(0.1, 0.8, 0.8)
+    love.graphics.rectangle('fill', slider_x, slider_y, slider_w, slider_h, 6, 6)
+    -- Desenhar handle
+    local handle_x = slider_x + value * slider_w
+    love.graphics.setColor(1 ,0.8, 0.1)
+    love.graphics.circle('fill', handle_x, slider_y + slider_h/2, handle_radius)
+    -- Texto do valor
+    love.graphics.setColor(1,1,1)
+    love.graphics.setFont(font)
+    love.graphics.printf(string.format("Volume", math.floor(value*100)), 0, slider_y - 36, 640, 'center')
 end
 
 function options:keypressed(key)
     if key == 'escape' then
         Gamestate.switch(require('menu'))
+    elseif key == 'left' then
+        options.master_volume = math.max(0, (options.master_volume or 0) - 0.05)
+        love.audio.setVolume(options.master_volume)
+    elseif key == 'right' then
+        options.master_volume = math.min(1, (options.master_volume or 0) + 0.05)
+        love.audio.setVolume(options.master_volume)
     end
 end
 
