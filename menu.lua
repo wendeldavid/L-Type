@@ -1,4 +1,5 @@
 local Gamestate = require 'libs.hump.gamestate'
+local options = require 'options'
 
 local menu = {selected = 1}
 local music
@@ -6,6 +7,7 @@ local music
 function menu:enter()
     if not music then
         music = love.audio.newSource('assets/st/main_menu.mp3', 'stream')
+        music:setVolume(options.master_volume)
         music:setLooping(true)
     end
     if not music:isPlaying() then

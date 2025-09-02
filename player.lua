@@ -89,6 +89,14 @@ function Player:update(dt)
     if py < 15 then self.collider:setY(15)
     elseif py > 480 - 15 then self.collider:setY(480 - 15) end
 
+    self:updatePlayerProjectiles(dt)
+
+    self:updateCharging(dt)
+
+    self:updateRepeller(dt, px, py)
+end
+
+function Player:updatePlayerProjectiles(dt)
     for i = #self.projectiles, 1, -1 do
         local proj = self.projectiles[i]
         if proj.collider and not proj.collider:isDestroyed() then
@@ -101,7 +109,9 @@ function Player:update(dt)
             table.remove(self.projectiles, i)
         end
     end
+end
 
+function Player:updateCharging(dt)
     -- Controle de carregamento do tiro
     if self.charging then
         self.charge_timer = self.charge_timer + dt
@@ -109,7 +119,9 @@ function Player:update(dt)
             self.charge_ready = true
         end
     end
+end
 
+function Player:updateRepeller(dt, px, py)
     -- Atualizar ângulo do repeller para apontar para o mouse
     local mx, my = love.mouse.getPosition()
     local new_angle = math.atan2(my - py, mx - px)
@@ -211,7 +223,7 @@ function Player:keypressed(key)
 end
 
 function Player:keyreleased(key)
-    if (key == 'b' or key == 'y') or self.charging then
+    if (key == 'b' or key == 'y') then
         if self.charge_ready then
             self:shoot(true)
         else

@@ -5,6 +5,7 @@ local Enemy = require 'enemy'
 local paused = require 'paused'
 local game_over = require 'game_over'
 local finished = require 'finished'
+local options = require 'options'
 
 local game = {}
 local music
@@ -32,6 +33,7 @@ function game:enter()
     end
     local idx = love.math.random(1, #music_files)
     music = love.audio.newSource(music_files[idx], 'stream')
+    music:setVolume(options.master_volume)
     music:setLooping(true)
     music:play()
 
