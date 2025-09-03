@@ -58,6 +58,8 @@ function menu:keypressed(key)
         elseif self.selected == 3 then
             Gamestate.switch(require('credits'))
         end
+    elseif key == 'r' then
+        Gamestate.switch(require('jimmy_state'))
     elseif key == 'escape' then
         love.event.quit()
     end
