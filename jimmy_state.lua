@@ -1,3 +1,20 @@
+local audio_files = {
+    "assets/st/jimmy/Bolsonaro - Tarado.mp3",
+    "assets/st/jimmy/Alexandre Frota - O negocio é come cu e buceta.mp3",
+    "assets/st/jimmy/especialista - skylab.mp3",
+    "assets/st/jimmy/NENHO - Desça Daí Seu Corno, desça saí short meme.mp3",
+    "assets/st/jimmy/pegue_no_meu_pau.mp3",
+    "assets/st/jimmy/PODER360 - Bolsonaro - Imbrochável, imbrochável.mp3",
+    "assets/st/jimmy/The Weather Girls - Its Raining Men trecho short meme.mp3",
+    "assets/st/jimmy/ORIGINAL - nada sai do anus completa.mp3",
+    "assets/st/jimmy/Lula - Tirar a camisa, ir pro boteco, pedir uma cerveja gelada e ficar conversando.mp3",
+    "assets/st/jimmy/Olavo de Carvalho - Toda piroca se torna invisível a partir do momento que ela entra no seu cu short curto.mp3",
+    "assets/st/jimmy/Molejo - Samba Diferente - Faz carinha de quem tá gostando demais.mp3"
+}
+local audio_queue = {}
+local current_audio = nil
+local audio_timer = 0
+local audio_delay = 1 -- segundos entre áudios
 local pressed_keys = {}
 -- Função utilitária para cortar string em UTF-8 corretamente
 local function utf8_sub(str, start_char, end_char)
@@ -24,9 +41,28 @@ local typewriter_speed = 0.2 -- segundos por caractere
 function jimmy_state:enter()
     typewriter_timer = 0
     typewriter_pos = 0
+    -- Embaralhar áudios
+    audio_queue = {}
+    for i, v in ipairs(audio_files) do audio_queue[i] = v end
+    for i = #audio_queue, 2, -1 do
+        local j = math.random(i)
+        audio_queue[i], audio_queue[j] = audio_queue[j], audio_queue[i]
+    end
+    current_audio = nil
+    audio_timer = 0
 end
 
 function jimmy_state:update(dt)
+    -- Controle de áudio
+    if (not current_audio or not current_audio:isPlaying()) and #audio_queue > 0 then
+        audio_timer = audio_timer + dt
+        if audio_timer >= audio_delay then
+            audio_timer = 0
+            local next_file = table.remove(audio_queue, 1)
+            current_audio = love.audio.newSource(next_file, 'static')
+            current_audio:play()
+        end
+    end
     if dialogs and dialogs.dialogos and dialogs.dialogos[dialog_index] then
         local fala = dialogs.dialogos[dialog_index].fala or ""
         local utf8 = require("utf8")
