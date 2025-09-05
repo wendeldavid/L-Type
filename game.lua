@@ -25,6 +25,9 @@ game.flash_interval = 0.15 -- 3 flashes em ~0.45s
 game.flash_on = false
 
 function game:enter()
+    -- Carregar imagem do planeta e fonte do FPS uma vez
+    self.planet_img = love.graphics.newImage('assets/sprites/planet_1.png')
+    self.fpsFont = love.graphics.newFont(28)
     -- Reforçar inicialização de variáveis essenciais
     self.enemies = {}
     self.particles = {}
@@ -42,7 +45,7 @@ function game:enter()
 
     -- Inicializar variáveis de partículas
     self.particle_timer = 0
-    self.particle_interval = 0.1
+    self.particle_interval = 0.2
     self.particles = {}
 
     -- Definir classes de colisão
@@ -199,28 +202,9 @@ function game:update(dt)
         return
     end
 
-    -- limpa memoria de inimigos destruidos
     if not self.enemies then return end
-    for i = #self.enemies, 1, -1 do
-        local enemy = self.enemies[i]
-        if enemy.collider:isDestroyed() then
-            table.remove(self.enemies, i)
-        else
-            enemy:update(dt)
-        end
-    end
-
-    -- Spawn de enemies
-    self.spawn_timer = self.spawn_timer + dt
-    if self.spawn_timer >= self.spawn_interval then
-        self.spawn_timer = 0
-        local iy = math.random(15, 480-15)
-        table.insert(self.enemies, Enemy:new(self.world, 640-40, iy))
-    end
-
-    -- Atualizar inimigos e disparar projéteis (controle agora está em enemy.lua)
-    if not self.enemies then return end
-    for i = #self.enemies, 1, -1 do
+    local i = 1
+    while i <= #self.enemies do
         local enemy = self.enemies[i]
         if enemy.collider and enemy.collider:isDestroyed() then
             table.remove(self.enemies, i)
@@ -231,7 +215,15 @@ function game:update(dt)
                 enemy.shoot_timer = 0
                 enemy:shootAtPlayer(self.player)
             end
+            i = i + 1
         end
+    end
+    -- Spawn de enemies
+    self.spawn_timer = self.spawn_timer + dt
+    if self.spawn_timer >= self.spawn_interval then
+        self.spawn_timer = 0
+        local iy = math.random(15, 480-15)
+        table.insert(self.enemies, Enemy:new(self.world, 640-40, iy))
     end
 
     self:updateParticles(dt) -- Atualizar partículas
@@ -292,8 +284,7 @@ function game:draw()
     -- Desenhar planeta entre partículas e objetos
     if not self.planet_x then self.planet_x = 320 end
     if not self.planet_y then self.planet_y = 240 end
-    self.planet_x = self.planet_x - (dt or 0.1)
-    local planet_img = love.graphics.newImage('assets/sprites/planet_1.png')
+    local planet_img = self.planet_img
     local pw, ph = planet_img:getWidth(), planet_img:getHeight()
     local px, py = self.planet_x or 320, self.planet_y or 240
     local max_w = 128
@@ -321,14 +312,14 @@ function game:draw()
         e:draw()
     end
 
-    self.drawFPS()
+    self:drawFPS()
 end
 
 function game:drawFPS()
     local fps = love.timer.getFPS()
     local sh = love.graphics.getHeight()
     local oldFont = love.graphics.getFont()
-    local fpsFont = love.graphics.newFont(28)
+    local fpsFont = self.fpsFont
     love.graphics.setFont(fpsFont)
     local ffh = fpsFont:getHeight()
     love.graphics.setColor(1, 0, 0)
