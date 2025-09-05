@@ -1,16 +1,21 @@
 local Enemy = {}
 Enemy.__index = Enemy
+local enemy_sprites = {
+    love.graphics.newImage('assets/sprites/enemy_1.png'),
+    love.graphics.newImage('assets/sprites/enemy_2.png')
+}
 
 function Enemy:new(world, x, y)
     local obj = setmetatable({}, self)
-    obj.collider = world:newRectangleCollider(x, y, 30, 30)
+    obj.collider = world:newRectangleCollider(x, y, 60, 60)
     obj.collider:setType('dynamic')
-    obj.collider:setFixedRotation(true) -- Garantir que o collider não gire
-    obj.collider:setCollisionClass('Enemy') -- Configuração da classe de colisão dos inimigos
+    obj.collider:setFixedRotation(true)
+    obj.collider:setCollisionClass('Enemy')
     obj.collider:setUserData({collision_class = 'Enemy'})
     obj.speed = 20
-    obj.projectiles = {} -- Tabela para armazenar os projéteis
+    obj.projectiles = {}
     obj.world = world
+    obj.sprite = enemy_sprites[math.random(1, #enemy_sprites)]
     return obj
 end
 
@@ -21,9 +26,17 @@ end
 
 function Enemy:draw()
     local ex, ey = self.collider:getPosition()
-    love.graphics.setColor(0.3, 1, 0.3)
-    love.graphics.rectangle('line', ex-15, ey-15, 30, 30)
-    self:drawProjectiles() -- Desenha os projéteis
+    if self.sprite then
+        love.graphics.setColor(1, 1, 1, 0.5)
+        local img_w, img_h = self.sprite:getWidth(), self.sprite:getHeight()
+        love.graphics.draw(self.sprite, ex, ey, 0, 60/img_w, 60/img_h, img_w/2, img_h/2)
+        love.graphics.setColor(1,1,1,1)
+    else
+        love.graphics.setColor(1, 1, 1, 0.5)
+        love.graphics.rectangle('line', ex-30, ey-30, 60, 60)
+        love.graphics.setColor(1,1,1,1)
+    end
+    self:drawProjectiles()
 end
 
 function Enemy:shootAtPlayer(player)

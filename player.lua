@@ -6,7 +6,7 @@ Player.__index = Player
 function Player:new(world, x, y)
     local obj = setmetatable({}, self)
     obj.lives = 3
-    obj.collider = world:newRectangleCollider(x, y, 30, 30)
+    obj.collider = world:newRectangleCollider(x, y, 48, 48)
     obj.collider:setType('dynamic')
     obj.collider:setFixedRotation(true)
     obj.collider:setCollisionClass('Player')
@@ -162,8 +162,8 @@ function Player:draw()
 
     local ship_img = animation.sprite
     local img_w, img_h = ship_img:getWidth(), ship_img:getHeight()
-    -- Ajustar para 30x30 (tamanho do player)
-    love.graphics.draw(ship_img, px, py, 0, 30/img_w, 30/img_h, img_w/2, img_h/2)
+    -- Ajustar para 48x48 (tamanho do player)
+    love.graphics.draw(ship_img, px, py, 0, 48/img_w, 48/img_h, img_w/2, img_h/2)
 
     -- Desenhar projéteis
     for _, proj in ipairs(self.projectiles) do
