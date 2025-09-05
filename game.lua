@@ -127,9 +127,21 @@ game.beginContact = function(a, b, coll)
 end
 
 function game:update(dt)
-    -- Todas as operações abaixo só são executadas se as estruturas essenciais existem
     self.world:update(dt) -- Atualizar o mundo de física
     self.player:update(dt)
+
+    -- Atualizar posição do planeta (mais devagar)
+    if not self.planet_x then
+        local planet_img = love.graphics.newImage('assets/sprites/planet_1.png')
+        local pw = planet_img:getWidth()
+        local max_w = 128
+        local scale = max_w / pw
+        local screen_w = love.graphics.getWidth()
+        self.planet_x = screen_w - 50
+    end
+    if not self.planet_y then self.planet_y = 240 end
+    self.planet_x = self.planet_x - dt * 2 -- velocidade de 2px/s para a esquerda
+
 
     -- Proteger contra update após leave
     if not self.enemies or not self.player or not self.world then return end
@@ -273,10 +285,32 @@ function game:draw()
         love.graphics.clear(0, 0, 0) -- Preto padrão
     end
 
-    -- Desenhar partículas
+    -- Desenhar partículas maiores (atrás do planeta)
     love.graphics.setColor(1, 1, 1)
     for _, p in ipairs(self.particles) do
-        love.graphics.circle('fill', p.x, p.y, p.size)
+        if p.size > 2 then
+            love.graphics.circle('fill', p.x, p.y, p.size)
+        end
+    end
+
+    -- Desenhar planeta entre partículas e objetos
+    if not self.planet_x then self.planet_x = 320 end
+    if not self.planet_y then self.planet_y = 240 end
+    self.planet_x = self.planet_x - (dt or 0.1)
+    local planet_img = love.graphics.newImage('assets/sprites/planet_1.png')
+    local pw, ph = planet_img:getWidth(), planet_img:getHeight()
+    local px, py = self.planet_x or 320, self.planet_y or 240
+    local max_w = 128
+    local scale = max_w / pw
+    love.graphics.setColor(1,1,1,0.8)
+    love.graphics.draw(planet_img, px, py, 0, scale, scale, pw/2, ph/2)
+    love.graphics.setColor(1,1,1,1)
+
+    -- Desenhar partículas menores (à frente do planeta)
+    for _, p in ipairs(self.particles) do
+        if p.size <= 2 then
+            love.graphics.circle('fill', p.x, p.y, p.size)
+        end
     end
 
     -- Exibir score
