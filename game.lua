@@ -132,10 +132,6 @@ function game:update(dt)
 
     -- Atualizar posição do planeta (mais devagar)
     if not self.planet_x then
-        local planet_img = love.graphics.newImage('assets/sprites/planet_1.png')
-        local pw = planet_img:getWidth()
-        local max_w = 128
-        local scale = max_w / pw
         local screen_w = love.graphics.getWidth()
         self.planet_x = screen_w - 50
     end
@@ -324,6 +320,21 @@ function game:draw()
     for _, e in ipairs(self.enemies) do
         e:draw()
     end
+
+    self.drawFPS()
+end
+
+function game:drawFPS()
+    local fps = love.timer.getFPS()
+    local sh = love.graphics.getHeight()
+    local oldFont = love.graphics.getFont()
+    local fpsFont = love.graphics.newFont(28)
+    love.graphics.setFont(fpsFont)
+    local ffh = fpsFont:getHeight()
+    love.graphics.setColor(1, 0, 0)
+    love.graphics.print("FPS: " .. tostring(fps), 10, sh - ffh - 10)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.setFont(oldFont)
 end
 
 function game:leave()
