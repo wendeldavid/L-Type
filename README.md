@@ -1,5 +1,3 @@
-
-
 # L-Type
 
 L-Type is an R-Type clone developed in Lua using the [Love2D](https://love2d.org/) framework.
@@ -23,4 +21,8 @@ All libraries are included in the project's `libs/` folder.
 
 ## How to package
 
-To create a binary or `.love` file, zip the project and follow the instructions at https://love2d.org/wiki/Game_Distribution.
+To create a binary or `.love` file, run `make`. This will package "L-Type.love" locally.
+
+## Copy to R36S
+
+If you develop on linux, and want to install this game on R36S partition, just run `make deploy`
