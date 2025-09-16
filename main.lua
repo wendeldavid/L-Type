@@ -4,7 +4,6 @@ end
 
 local width, height = 640, 480
 local Gamestate = require 'libs.hump.gamestate'
-
 local credits = require('credits')
 local options = require('options')
 local game = require('game')

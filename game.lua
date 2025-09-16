@@ -25,8 +25,6 @@ game.flash_interval = 0.15 -- 3 flashes em ~0.45s
 game.flash_on = false
 
 function game:enter()
-    -- Carregar imagem do planeta e fonte do FPS uma vez
-    self.planet_img = love.graphics.newImage('assets/sprites/planet_1.png')
     self.fpsFont = love.graphics.newFont(28)
     -- Reforçar inicialização de variáveis essenciais
     self.enemies = {}
@@ -62,6 +60,9 @@ function game:enter()
 
     -- Callback de colisão seguro
     self.world:setCallbacks(game.beginContact)
+
+    -- Carregar imagem do planeta e fonte do FPS uma vez
+    self.planet_img = love.graphics.newImage('assets/sprites/planet_1.png')
 end
 
 game.beginContact = function(a, b, coll)
