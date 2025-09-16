@@ -3,7 +3,7 @@ local Gamestate = require 'libs.hump.gamestate'
 local options = {
     master_volume = 0.6,
     music_volume = 1,
-    sfx_volume = 1
+    sfx_volume = 0.1
 }
 
 local font = love.graphics.newFont('assets/fonts/starkwalker_classic/StarkwalkerClassic.otf', 32)
