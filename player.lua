@@ -5,6 +5,9 @@ Player.__index = Player
 
 function Player:new(world, x, y)
     local obj = setmetatable({}, self)
+
+    obj.shoot_sound = love.audio.newSource('assets/sound/retro-laser-1-236669.mp3', 'static')
+    obj.charged_shoot_sound = love.audio.newSource('assets/sound/laser-zap-90575.mp3', 'static')
     obj.lives = 3
     obj.collider = world:newRectangleCollider(x, y, 48, 48)
     obj.collider:setType('dynamic')
@@ -31,6 +34,17 @@ function Player:new(world, x, y)
 end
 
 function Player:shoot(isCharged)
+    if isCharged then
+        if self.charged_shoot_sound then
+            self.charged_shoot_sound:stop()
+            self.charged_shoot_sound:play()
+        end
+    else
+        if self.shoot_sound then
+            self.shoot_sound:stop()
+            self.shoot_sound:play()
+        end
+    end
     local px, py = self.collider:getPosition()
     local projectile
     if isCharged then
