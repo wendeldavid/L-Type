@@ -7,13 +7,18 @@ local game_over = require 'game_over'
 local finished = require 'finished'
 local options = require 'options'
 
-local game = {}
+local stage_01 = require 'stage-01'
+
+local game = {
+    current_stage = stage_01
+}
 local music
 local music_files = {
     'assets/st/Metal Storm.mp3',
     'assets/st/Infernal Machinery.mp3',
     'assets/st/Infernal Machinery (1).mp3'
 }
+
 game.score = 0
 
 -- Variáveis para efeito de flash
@@ -63,6 +68,8 @@ function game:enter()
 
     -- Carregar imagem do planeta e fonte do FPS uma vez
     self.planet_img = love.graphics.newImage('assets/sprites/planet_1.png')
+
+    self.current_stage:enter()
 end
 
 game.beginContact = function(a, b, coll)
@@ -133,6 +140,7 @@ end
 function game:update(dt)
     self.world:update(dt) -- Atualizar o mundo de física
     self.player:update(dt)
+    self.current_stage:update(dt)
 
     -- Atualizar posição do planeta (mais devagar)
     if not self.planet_x then
@@ -141,7 +149,6 @@ function game:update(dt)
     end
     if not self.planet_y then self.planet_y = 240 end
     self.planet_x = self.planet_x - dt * 2 -- velocidade de 2px/s para a esquerda
-
 
     -- Proteger contra update após leave
     if not self.enemies or not self.player or not self.world then return end
@@ -281,6 +288,8 @@ function game:draw()
             love.graphics.circle('fill', p.x, p.y, p.size)
         end
     end
+
+    self.current_stage:draw()
 
     -- Desenhar planeta entre partículas e objetos
     if not self.planet_x then self.planet_x = 320 end

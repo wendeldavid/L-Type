@@ -52,7 +52,7 @@ function menu:keypressed(key)
         if self.selected > 3 then self.selected = 1 end
     elseif key == 'return' or key == 'kpenter' then
         if self.selected == 1 then
-            Gamestate.switch(require('stage-01'))
+            Gamestate.switch(require('game'))
         elseif self.selected == 2 then
             Gamestate.switch(require('options'))
         elseif self.selected == 3 then
