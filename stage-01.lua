@@ -12,14 +12,16 @@ end
 function stage:update(dt)
 	if self.map then self.map:update(dt) end
 	-- Move o mapa da direita para a esquerda
-	self.map_offset = self.map_offset - (dt * 60) -- velocidade 60px/s
+	self.map_offset = self.map_offset - (dt * 10) -- velocidade 10px/s
     print(self.map_offset)
 end
 
 function stage:draw()
+    -- Desenhar o mapa com offset
+    self.map:draw(self.map_offset, 0)
+
     love.graphics.push()
     love.graphics.translate(self.map_offset, 0)
-    self.map:draw()
     love.graphics.pop()
 end
 
