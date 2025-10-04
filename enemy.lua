@@ -7,7 +7,7 @@ local enemy_sprites = {
 
 function Enemy:new(world, x, y)
     local obj = setmetatable({}, self)
-    obj.collider = world:newRectangleCollider(x, y, 60, 60)
+    obj.collider = world:newBSGRectangleCollider(x, y, 60, 60, 10)
     obj.collider:setType('dynamic')
     obj.collider:setFixedRotation(true)
     obj.collider:setCollisionClass('Enemy')

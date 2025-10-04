@@ -57,6 +57,7 @@ function game:enter()
     self.world:addCollisionClass('PlayerProjectile', {ignores = {'Player'}})
     self.world:addCollisionClass('EnemyProjectile', {ignores = {'Enemy', 'EnemyProjectile'}})
     self.world:addCollisionClass('Repeller', {ignores = {'Player', 'PlayerProjectile'}})
+    self.world:addCollisionClass('Terrain')
 
     self.player = Player:new(self.world, 50, 480/2 - 15)
     self.enemies = {}
@@ -69,7 +70,7 @@ function game:enter()
     -- Carregar imagem do planeta e fonte do FPS uma vez
     self.planet_img = love.graphics.newImage('assets/sprites/planet_1.png')
 
-    self.current_stage:enter()
+    self.current_stage:enter(self.world)
 end
 
 game.beginContact = function(a, b, coll)
@@ -135,6 +136,8 @@ game.beginContact = function(a, b, coll)
         end
         return
     end
+
+    print(aClass, bClass)
 end
 
 function game:update(dt)
@@ -323,6 +326,8 @@ function game:draw()
     end
 
     self:drawFPS()
+
+    self.world:draw()
 end
 
 function game:drawFPS()

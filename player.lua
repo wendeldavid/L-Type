@@ -12,7 +12,7 @@ function Player:new(world, x, y)
     obj.charged_shoot_sound = love.audio.newSource('assets/sound/laser-zap-90575.mp3', 'static')
     obj.charged_shoot_sound:setVolume(options.sfx_volume)
     obj.lives = 3
-    obj.collider = world:newRectangleCollider(x, y, 48, 48)
+    obj.collider = world:newBSGRectangleCollider(x, y, 48, 48, 10)
     obj.collider:setType('dynamic')
     obj.collider:setFixedRotation(true)
     obj.collider:setCollisionClass('Player')
