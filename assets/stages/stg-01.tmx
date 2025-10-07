@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.1-99-gec89c545" orientation="orthogonal" renderorder="right-down" width="64" height="15" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="3">
+<map version="1.10" tiledversion="1.11.1-99-gec89c545" orientation="orthogonal" renderorder="right-down" width="64" height="15" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="21">
  <editorsettings>
   <export target="stg-01.lua" format="lua"/>
  </editorsettings>
@@ -25,9 +25,34 @@
 0,0,0,0,0,0,0,0,0,26,27,27,27,27,27,27,27,27,27,27,70,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,0,0,81,82,83,83,83,83,84,85,0,0,0,0,0,0,1073741854,156
 </data>
  </layer>
- <objectgroup color="#ffff00" id="2" name="terrain_layer" class="terrain">
-  <object id="2" name="poly" type="Terrain" x="272" y="150.5">
-   <polygon points="0,0 73,-2.5 33,41"/>
+ <objectgroup color="#ffff00" id="2" name="terrain_layer" class="terrain" visible="0">
+  <object id="5" type="Terrain" x="290" y="448" width="352" height="30"/>
+  <object id="6" type="Terrain" x="642" y="322" width="161" height="157"/>
+  <object id="7" type="Terrain" x="802" y="193" width="93" height="136"/>
+  <object id="8" type="Terrain" x="900" y="291" width="221" height="128"/>
+  <object id="9" type="Terrain" x="1247" y="384" width="162" height="28"/>
+  <object id="10" type="Terrain" x="1120" y="418" width="354" height="60"/>
+  <object id="11" type="Terrain" x="739" y="324">
+   <polygon points="0,0 -6,-103 61,-132"/>
   </object>
+  <object id="12" type="Terrain" x="1311.33" y="384">
+   <polygon points="0,0 19.3333,-66.6667 31.3333,-0.666667"/>
+  </object>
+  <object id="13" type="Terrain" x="1247.33" y="390.667">
+   <polygon points="0,0 -28.6667,22.6667 -2,24.6667"/>
+  </object>
+  <object id="14" type="Terrain" x="1408.67" y="386.667">
+   <polygon points="0,0 30,28.6667 2.66667,27.3333"/>
+  </object>
+  <object id="15" type="Terrain" x="1569.33" y="449.333" width="191.333" height="30"/>
+  <object id="16" type="Terrain" x="1566.67" y="449.333">
+   <polygon points="0,0 -32.6667,32 -0.666667,29.3333"/>
+  </object>
+  <object id="17" type="Terrain" x="1764" y="454">
+   <polygon points="0,0 27.3333,27.3333 2.66667,24.6667"/>
+  </object>
+  <object id="18" type="Terrain" x="2018.67" y="2.66667" width="16.6667" height="474.667"/>
+  <object id="19" type="Terrain" x="1984" y="0" width="28" height="32.6667"/>
+  <object id="20" type="Terrain" x="1985.33" y="448" width="28.6667" height="31.3333"/>
  </objectgroup>
 </map>

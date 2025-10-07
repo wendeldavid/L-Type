@@ -10,7 +10,7 @@ return {
   tilewidth = 32,
   tileheight = 32,
   nextlayerid = 3,
-  nextobjectid = 3,
+  nextobjectid = 21,
   properties = {},
   tilesets = {
     {
@@ -86,7 +86,7 @@ return {
       id = 2,
       name = "terrain_layer",
       class = "terrain",
-      visible = true,
+      visible = false,
       opacity = 1,
       offsetx = 0,
       offsety = 0,
@@ -95,21 +95,241 @@ return {
       properties = {},
       objects = {
         {
-          id = 2,
-          name = "poly",
+          id = 5,
+          name = "",
+          type = "Terrain",
+          shape = "rectangle",
+          x = 290,
+          y = 448,
+          width = 352,
+          height = 30,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 6,
+          name = "",
+          type = "Terrain",
+          shape = "rectangle",
+          x = 642,
+          y = 322,
+          width = 161,
+          height = 157,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 7,
+          name = "",
+          type = "Terrain",
+          shape = "rectangle",
+          x = 802,
+          y = 193,
+          width = 93,
+          height = 136,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 8,
+          name = "",
+          type = "Terrain",
+          shape = "rectangle",
+          x = 900,
+          y = 291,
+          width = 221,
+          height = 128,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 9,
+          name = "",
+          type = "Terrain",
+          shape = "rectangle",
+          x = 1247,
+          y = 384,
+          width = 162,
+          height = 28,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 10,
+          name = "",
+          type = "Terrain",
+          shape = "rectangle",
+          x = 1120,
+          y = 418,
+          width = 354,
+          height = 60,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 11,
+          name = "",
           type = "Terrain",
           shape = "polygon",
-          x = 272,
-          y = 150.5,
+          x = 739,
+          y = 324,
           width = 0,
           height = 0,
           rotation = 0,
           visible = true,
           polygon = {
             { x = 0, y = 0 },
-            { x = 73, y = -2.5 },
-            { x = 33, y = 41 }
+            { x = -6, y = -103 },
+            { x = 61, y = -132 }
           },
+          properties = {}
+        },
+        {
+          id = 12,
+          name = "",
+          type = "Terrain",
+          shape = "polygon",
+          x = 1311.33,
+          y = 384,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          polygon = {
+            { x = 0, y = 0 },
+            { x = 19.3333, y = -66.6667 },
+            { x = 31.3333, y = -0.666667 }
+          },
+          properties = {}
+        },
+        {
+          id = 13,
+          name = "",
+          type = "Terrain",
+          shape = "polygon",
+          x = 1247.33,
+          y = 390.667,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          polygon = {
+            { x = 0, y = 0 },
+            { x = -28.6667, y = 22.6667 },
+            { x = -2, y = 24.6667 }
+          },
+          properties = {}
+        },
+        {
+          id = 14,
+          name = "",
+          type = "Terrain",
+          shape = "polygon",
+          x = 1408.67,
+          y = 386.667,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          polygon = {
+            { x = 0, y = 0 },
+            { x = 30, y = 28.6667 },
+            { x = 2.66667, y = 27.3333 }
+          },
+          properties = {}
+        },
+        {
+          id = 15,
+          name = "",
+          type = "Terrain",
+          shape = "rectangle",
+          x = 1569.33,
+          y = 449.333,
+          width = 191.333,
+          height = 30,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 16,
+          name = "",
+          type = "Terrain",
+          shape = "polygon",
+          x = 1566.67,
+          y = 449.333,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          polygon = {
+            { x = 0, y = 0 },
+            { x = -32.6667, y = 32 },
+            { x = -0.666667, y = 29.3333 }
+          },
+          properties = {}
+        },
+        {
+          id = 17,
+          name = "",
+          type = "Terrain",
+          shape = "polygon",
+          x = 1764,
+          y = 454,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          polygon = {
+            { x = 0, y = 0 },
+            { x = 27.3333, y = 27.3333 },
+            { x = 2.66667, y = 24.6667 }
+          },
+          properties = {}
+        },
+        {
+          id = 18,
+          name = "",
+          type = "Terrain",
+          shape = "rectangle",
+          x = 2018.67,
+          y = 2.66667,
+          width = 16.6667,
+          height = 474.667,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 19,
+          name = "",
+          type = "Terrain",
+          shape = "rectangle",
+          x = 1984,
+          y = 0,
+          width = 28,
+          height = 32.6667,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 20,
+          name = "",
+          type = "Terrain",
+          shape = "rectangle",
+          x = 1985.33,
+          y = 448,
+          width = 28.6667,
+          height = 31.3333,
+          rotation = 0,
+          visible = true,
           properties = {}
         }
       }

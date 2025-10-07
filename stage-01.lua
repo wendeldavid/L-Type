@@ -1,30 +1,36 @@
 -- Stage-01 herda comportamentos de game.lua e adiciona o mapa
 local sti = require("libs.Simple-Tiled-Implementation.sti.init")
 
-local stage = {}
-
-stage.map_offset = 0
-stage.terrain = {}
+local stage = {
+    map_offset = 0,
+    colliders = {}
+}
 
 function stage:enter(world)
 	self.map = sti("assets/stages/stg-01.lua")
 
+    stage.terraincolliders = {}
     for _, obj in ipairs(self.map.layers["terrain_layer"].objects) do
         if obj.type == "Terrain" then
-            stage.terrain = obj
+            if obj.shape == "polygon" then
+                local vertices = {}
+                for _, vertex in ipairs(obj.polygon) do
+                    table.insert(vertices, vertex.x)
+                    table.insert(vertices, vertex.y)
+                end
+                local collider = world:newPolygonCollider(vertices)
+                collider:setType("static")
+                collider:setCollisionClass(obj.type)
+                table.insert(stage.colliders, collider)
+            end
+            if obj.shape == "rectangle" then
+                local collider = world:newRectangleCollider(obj.x, obj.y, obj.width, obj.height)
+                collider:setType("static")
+                collider:setCollisionClass(obj.type)
+                table.insert(stage.colliders, collider)
+            end
         end
     end
-
-    -- Transladar o polígono para a posição do mapa
-    stage.terrain.translated_polygon = {}
-    for _, vertex in ipairs(stage.terrain.polygon) do
-        table.insert(stage.terrain.translated_polygon, vertex.x)
-        table.insert(stage.terrain.translated_polygon, vertex.y)
-    end
-
-    stage.terrain.collider = world:newPolygonCollider(stage.terrain.translated_polygon)
-    stage.terrain.collider:setType("static")
-    stage.terrain.collider:setCollisionClass(stage.terrain.type)
 end
 
 function stage:update(dt)
@@ -33,10 +39,9 @@ function stage:update(dt)
 	-- Move o mapa da direita para a esquerda
 	self.map_offset = self.map_offset - (dt * 10) -- velocidade 10px/s
 
-    if stage.terrain and stage.terrain.collider then
-        local new_x = stage.terrain.width/2 + self.map_offset
-        local new_y = stage.terrain.height/2
-        stage.terrain.collider:setPosition(new_x, new_y)
+    for _, collider in ipairs(stage.colliders) do
+        local x, y = collider:getPosition()
+        collider:setPosition(x - (dt * 10), y)
     end
 end
 
