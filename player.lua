@@ -1,4 +1,5 @@
 local animation = require('animations/player_ship')
+local options = require 'options'
 
 local Player = {}
 Player.__index = Player
@@ -7,9 +8,11 @@ function Player:new(world, x, y)
     local obj = setmetatable({}, self)
 
     obj.shoot_sound = love.audio.newSource('assets/sound/retro-laser-1-236669.mp3', 'static')
+    obj.shoot_sound:setVolume(options.sfx_volume)
     obj.charged_shoot_sound = love.audio.newSource('assets/sound/laser-zap-90575.mp3', 'static')
+    obj.charged_shoot_sound:setVolume(options.sfx_volume)
     obj.lives = 3
-    obj.collider = world:newRectangleCollider(x, y, 48, 48)
+    obj.collider = world:newBSGRectangleCollider(x, y, 48, 48, 10)
     obj.collider:setType('dynamic')
     obj.collider:setFixedRotation(true)
     obj.collider:setCollisionClass('Player')
