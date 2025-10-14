@@ -31,6 +31,9 @@ local getControls = function()
         }
     end
 
+    if BUILD_TYPE == 'nx' then
+    end
+
     -- TODO touch
 end
 
