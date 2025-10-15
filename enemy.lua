@@ -1,3 +1,5 @@
+local EnemyProjectile = require 'enemy_projectile'
+
 local Enemy = {}
 Enemy.__index = Enemy
 local enemy_sprites = {
@@ -21,7 +23,6 @@ end
 
 function Enemy:update(dt)
     self.collider:setX(self.collider:getX() - self.speed * dt)
-    self:updateProjectiles(dt) -- Atualiza a posição dos projéteis
 end
 
 function Enemy:draw()
@@ -36,7 +37,6 @@ function Enemy:draw()
         love.graphics.rectangle('line', ex-30, ey-30, 60, 60)
         love.graphics.setColor(1,1,1,1)
     end
-    self:drawProjectiles()
 end
 
 function Enemy:shootAtPlayer(player)
@@ -46,46 +46,9 @@ function Enemy:shootAtPlayer(player)
     local dist = math.sqrt(dx*dx + dy*dy)
     local speed = 80
     local vx, vy = (dx/dist)*speed, (dy/dist)*speed
-    local projectile = {
-        collider = self.collider.world:newRectangleCollider(ex, ey, 10, 4),
-        speed = speed,
-        vx = vx,
-        vy = vy
-    }
-    projectile.collider:setType('dynamic')
-    projectile.collider:setCollisionClass('EnemyProjectile')
-    projectile.collider:setUserData({collision_class = 'EnemyProjectile'})
-    projectile.collider:setRestitution(0.8)
-    projectile.collider:applyAngularImpulse(5800)
 
-    table.insert(self.projectiles, projectile)
-end
-
-function Enemy:updateProjectiles(dt)
-    for i = #self.projectiles, 1, -1 do
-        local proj = self.projectiles[i]
-        if proj.collider and not proj.collider:isDestroyed() then
-            proj.collider:setX(proj.collider:getX() + proj.vx * dt)
-            proj.collider:setY(proj.collider:getY() + proj.vy * dt)
-            if proj.collider:getX() < 0 or proj.collider:getX() > 640 or proj.collider:getY() < 0 or proj.collider:getY() > 480 then
-                proj.collider:destroy()
-                table.remove(self.projectiles, i)
-            end
-        else
-            table.remove(self.projectiles, i)
-        end
-    end
-end
-
-function Enemy:drawProjectiles()
-    love.graphics.setColor(1, 0, 0)
-    for _, proj in ipairs(self.projectiles) do
-        if proj.collider and not proj.collider:isDestroyed() then
-            local x, y = proj.collider:getPosition()
-            love.graphics.rectangle('fill', x, y - 2, 10, 4)
-        end
-    end
-    love.graphics.setColor(1, 1, 1)
+    local projectile = EnemyProjectile:new(self.collider.world, ex, ey, vx, vy)
+    return projectile
 end
 
 return Enemy
