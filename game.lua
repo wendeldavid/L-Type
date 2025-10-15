@@ -55,12 +55,13 @@ function game:enter()
     self.world:addCollisionClass('Player')
     self.world:addCollisionClass('Enemy', {ignores = {'Enemy'}})
     self.world:addCollisionClass('PlayerProjectile', {ignores = {'Player'}})
-    self.world:addCollisionClass('EnemyProjectile', {ignores = {'Enemy', 'EnemyProjectile'}})
+    self.world:addCollisionClass('EnemyProjectile', {ignores = {'Enemy', 'EnemyProjectile', 'PlayerProjectile'}})
     self.world:addCollisionClass('Repeller', {ignores = {'Player', 'PlayerProjectile'}})
     self.world:addCollisionClass('Terrain')
 
     self.player = Player:new(self.world, 50, 480/2 - 15)
     self.enemies = {}
+    self.enemy_projectiles = {}
     self.spawn_timer = 0
     self.spawn_interval = 6
 
@@ -115,6 +116,7 @@ game.beginContact = function(a, b, coll)
         -- Marcar ambos para destruição, ou lidar com lógica de dano
         aUserData:destroy()
         bUserData:destroy()
+
         game.score = game.score + 1
         return
     end
@@ -123,21 +125,32 @@ game.beginContact = function(a, b, coll)
     if (aClass == 'EnemyProjectile' and bClass == 'Repeller') or (aClass == 'Repeller' and bClass == 'EnemyProjectile') then
         -- Encontrar o player associado ao repeller
         local repellerUserData = (aClass == 'Repeller') and aUserData or bUserData
+        local projectileCollider = (aClass == 'EnemyProjectile') and a or b
+
         if repellerUserData and repellerUserData.parent and repellerUserData.parent.showRepellerOnCollision then
             repellerUserData.parent:showRepellerOnCollision()
         end
-        -- Marcar projétil inimigo para destruição
-        if aClass == 'EnemyProjectile' and a and type(a.getUserData) == 'function' then
-            local ud = a:getUserData() or {}
-            a:setUserData(ud)
-        elseif bClass == 'EnemyProjectile' and b and type(b.getUserData) == 'function' then
-            local ud = b:getUserData() or {}
-            b:setUserData(ud)
+
+        -- Aplicar força de repulsão ao projétil
+        if projectileCollider and projectileCollider.getPosition and repellerUserData.parent and repellerUserData.parent.collider then
+            local px, py = projectileCollider:getPosition()
+            local rx, ry = repellerUserData.parent.collider:getPosition()
+
+            -- Calcular direção de repulsão (do repeller para o projétil)
+            local dx, dy = px - rx, py - ry
+            local dist = math.sqrt(dx*dx + dy*dy)
+            if dist > 0 then
+                -- Normalizar e aplicar força
+                local force = 200 -- força de repulsão
+                local fx, fy = (dx/dist) * force, (dy/dist) * force
+                projectileCollider:applyLinearImpulse(fx, fy)
+            end
         end
+
         return
     end
 
-    print(aClass, bClass)
+    -- print(aClass, bClass)
 end
 
 function game:update(dt)
@@ -158,22 +171,6 @@ function game:update(dt)
 
     -- Destruir projéteis inimigos marcados para destruição (seguro fora do callback)
     if not self.enemies then return end
-    for _, enemy in ipairs(self.enemies) do
-        if enemy.projectiles then
-            for i = #enemy.projectiles, 1, -1 do
-                local proj = enemy.projectiles[i]
-                if proj.collider and type(proj.collider.getUserData) == 'function' then
-                    local ud = proj.collider:getUserData()
-                    if ud and ud._to_destroy then
-                        proj.collider:destroy()
-                        table.remove(enemy.projectiles, i)
-
-                        game.player.lives = game.player.lives - 1
-                    end
-                end
-            end
-        end
-    end
 
     -- Controle do efeito de flash
     if self.flash_active then
@@ -221,12 +218,36 @@ function game:update(dt)
             table.remove(self.enemies, i)
         else
             enemy.shoot_timer = (enemy.shoot_timer or 0) + dt
-            enemy:update(dt)
+            -- Apenas mover o inimigo, não atualizar projéteis aqui
+            enemy.collider:setX(enemy.collider:getX() - enemy.speed * dt)
             if enemy.shoot_timer >= 2 then
                 enemy.shoot_timer = 0
-                enemy:shootAtPlayer(self.player)
+                local projectile = enemy:shootAtPlayer(self.player)
+                table.insert(self.enemy_projectiles, projectile)
             end
             i = i + 1
+        end
+    end
+
+    -- Atualizar todos os projéteis inimigos independentemente do inimigo estar vivo
+    for i = #self.enemy_projectiles, 1, -1 do
+        local proj = self.enemy_projectiles[i]
+        if proj.collider and not proj.collider:isDestroyed() then
+            -- Verificar se o projétil foi marcado para destruição
+            local ud = proj.collider:getUserData()
+            if ud and ud._to_destroy then
+                proj.collider:destroy()
+                table.remove(self.enemy_projectiles, i)
+            else
+                proj:update(dt)
+                -- projectile out of screen
+                if proj.collider:getX() < 0 or proj.collider:getX() > 640 or proj.collider:getY() < 0 or proj.collider:getY() > 480 then
+                    proj.collider:destroy()
+                    table.remove(self.enemy_projectiles, i)
+                end
+            end
+        else
+            table.remove(self.enemy_projectiles, i)
         end
     end
     -- Spawn de enemies
@@ -323,6 +344,13 @@ function game:draw()
     self.player:draw()
     for _, e in ipairs(self.enemies) do
         e:draw()
+    end
+    
+    -- Desenhar projéteis inimigos
+    for _, proj in ipairs(self.enemy_projectiles) do
+        if proj.collider and not proj.collider:isDestroyed() then
+            proj:draw()
+        end
     end
 
     self:drawFPS()
