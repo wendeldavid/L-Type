@@ -51,6 +51,15 @@ function credits:keypressed(key)
     end
 end
 
+function credits:joystickpressed(joystick, button)
+end
+
+function credits:gamepadpressed(gamepad, button)
+    if button == 'back' and can_return then
+        Gamestate.switch(require('menu'))
+    end
+end
+
 function credits:leave()
     -- Limpar referências se necessário
 end

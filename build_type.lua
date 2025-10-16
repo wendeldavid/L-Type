@@ -1,2 +1,2 @@
 -- portable, pc
-return "portable"
+return "nx"

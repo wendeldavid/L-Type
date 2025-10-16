@@ -14,6 +14,12 @@ function paused:keypressed(key)
     end
 end
 
+function paused:gamepadpressed(gamepad, button)
+    if button == 'start' then
+        Gamestate.pop()
+    end
+end
+
 function paused:leave()
     -- Limpar referências se necessário
 end
