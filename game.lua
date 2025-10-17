@@ -275,6 +275,28 @@ function game:keyreleased(key)
     self.player:keyreleased(key)
 end
 
+function game:joystickpressed(joystick, button)
+    self.player:joystickpressed(joystick, button)
+end
+
+function game:joystickreleased(joystick, button)
+    self.player:joystickreleased(joystick, button)
+end
+
+function game:gamepadpressed(gamepad, button)
+    if button == 'back' then
+        Gamestate.switch(require('menu'))
+    elseif button == 'start' then
+        Gamestate.push(paused)
+    else
+        self.player:gamepadpressed(gamepad, button)
+    end
+end
+
+function game:gamepadreleased(gamepad, button)
+    self.player:gamepadreleased(gamepad, button)
+end
+
 function game:updateParticles(dt)
     self.particle_timer = self.particle_timer + dt
     if self.particle_timer >= self.particle_interval then
@@ -345,7 +367,7 @@ function game:draw()
     for _, e in ipairs(self.enemies) do
         e:draw()
     end
-    
+
     -- Desenhar projéteis inimigos
     for _, proj in ipairs(self.enemy_projectiles) do
         if proj.collider and not proj.collider:isDestroyed() then

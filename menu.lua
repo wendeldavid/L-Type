@@ -4,6 +4,9 @@ local options = require 'options'
 local menu = {selected = 1}
 local music
 
+local menuTitleFont = love.graphics.newFont('assets/fonts/starkwalker_classic/StarkwalkerClassic.otf', 64)
+local menuFont = love.graphics.newFont('assets/fonts/starkwalker_classic/StarkwalkerClassic.otf', 32)
+
 function menu:enter()
     if not music then
         music = love.audio.newSource('assets/st/main_menu.mp3', 'stream')
@@ -14,6 +17,7 @@ function menu:enter()
         music:play()
     end
 end
+
 function menu:leave()
     if music and music:isPlaying() then
         music:stop()
@@ -23,12 +27,10 @@ end
 function menu:draw()
     local oldFont = love.graphics.getFont()
 
-    local menuTitleFont = love.graphics.newFont('assets/fonts/starkwalker_classic/StarkwalkerClassic.otf', 64)
     love.graphics.setFont(menuTitleFont)
     love.graphics.setColor(0.2, 0.2, 1)
     love.graphics.printf("L-TYPE", 0, 480/2-150, 640, 'center')
 
-    local menuFont = love.graphics.newFont('assets/fonts/starkwalker_classic/StarkwalkerClassic.otf', 32)
     love.graphics.setFont(menuFont)
 
     local items = {"Play", "Options", "Credits"}
@@ -63,4 +65,26 @@ function menu:keypressed(key)
     end
 end
 
+function menu:joystickpressed(joystick, button)
+end
+
+function menu:gamepadpressed(gamepad, button)
+    if button == 'dpup' then
+        self.selected = self.selected - 1
+        if self.selected < 1 then self.selected = 3 end
+    elseif button == 'dpdown' then
+        self.selected = self.selected + 1
+        if self.selected > 3 then self.selected = 1 end
+    elseif button == 'a' or button == 'start' then
+        if self.selected == 1 then
+            Gamestate.switch(require('game'))
+        elseif self.selected == 2 then
+            Gamestate.switch(require('options'))
+        elseif self.selected == 3 then
+            Gamestate.switch(require('credits'))
+        end
+    elseif button == 'back' or button == 'select' then
+        love.event.quit()
+    end
+end
 return menu

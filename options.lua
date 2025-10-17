@@ -1,7 +1,7 @@
 local Gamestate = require 'libs.hump.gamestate'
 
 local options = {
-    master_volume = 0.1,
+    master_volume = 0.5,
     music_volume = 0.1,
     sfx_volume = 0.1
 }
@@ -28,6 +28,16 @@ local getControls = function()
             {key = "ESC", action = "Menu/Pausa"},
             {key = "P", action = "Pausar o jogo"},
             {key = "Espaço/Enter", action = "Selecionar no menu"},
+        }
+    end
+
+    if BUILD_TYPE == 'nx' then
+        return {
+            {key = "Direcional ou Analógico esquerdo", action = "Mover a nave"},
+            {key = "Y/ZR", action = "Atirar"},
+            {key = "Analógico direito", action = "Direção do escudo defletor"},
+            {key = "+", action = "Menu/Pausa"},
+            {key = "-", action = "Sair do jogo"},
         }
     end
 
@@ -85,6 +95,22 @@ function options:keypressed(key)
         options.master_volume = math.max(0, (options.master_volume or 0) - 0.05)
         love.audio.setVolume(options.master_volume)
     elseif key == 'right' then
+        options.master_volume = math.min(1, (options.master_volume or 0) + 0.05)
+        love.audio.setVolume(options.master_volume)
+    end
+end
+
+function options:joystickpressed(joystick, button)
+
+end
+
+function options:gamepadpressed(gamepad, button)
+    if button == 'back' then
+        Gamestate.switch(require('menu'))
+    elseif button == 'dpleft' then
+        options.master_volume = math.max(0, (options.master_volume or 0) - 0.05)
+        love.audio.setVolume(options.master_volume)
+    elseif button == 'dpright' then
         options.master_volume = math.min(1, (options.master_volume or 0) + 0.05)
         love.audio.setVolume(options.master_volume)
     end

@@ -1,7 +1,12 @@
 local animation = require('animations/player_ship')
 local options = require 'options'
 
-local Player = {}
+local Player = {
+    movingUp = false,
+    movingDown = false,
+    movingLeft = false,
+    movingRight = false
+}
 Player.__index = Player
 
 function Player:new(world, x, y)
@@ -77,27 +82,46 @@ function Player:shoot(isCharged)
 end
 
 function Player:isMovingUp()
-    return love.keyboard.isDown('up') or love.keyboard.isDown('w')
+    return love.keyboard.isDown('up') or love.keyboard.isDown('w') or self.movingUp
 end
 
 function Player:isMovingDown()
-    return love.keyboard.isDown('down') or love.keyboard.isDown('s')
+    return love.keyboard.isDown('down') or love.keyboard.isDown('s') or self.movingDown
 end
 
 function Player:isMovingLeft()
-    return love.keyboard.isDown('left') or love.keyboard.isDown('a')
+    return love.keyboard.isDown('left') or love.keyboard.isDown('a') or self.movingLeft
 end
 
 function Player:isMovingRight()
-    return love.keyboard.isDown('right') or love.keyboard.isDown('d')
+    return love.keyboard.isDown('right') or love.keyboard.isDown('d') or self.movingRight
 end
 
 function Player:update(dt)
     local vx, vy = 0, 0
+
+    -- Controle digital (teclado + direcional digital do gamepad)
     if self:isMovingUp() then vy = -self.speed end
     if self:isMovingDown() then vy = self.speed end
     if self:isMovingLeft() then vx = -self.speed end
     if self:isMovingRight() then vx = self.speed end
+
+    -- Controle analógico (direcional analógico esquerdo do gamepad)
+    local gamepad = love.joystick.getJoysticks()[1] -- Primeiro gamepad conectado
+    if gamepad then
+        local left_x = gamepad:getAxis(1) -- Eixo X do direcional esquerdo
+        local left_y = gamepad:getAxis(2) -- Eixo Y do direcional esquerdo
+
+        -- Aplicar deadzone para evitar movimento involuntário
+        local deadzone = 0.2
+        if math.abs(left_x) > deadzone then
+            vx = left_x * self.speed
+        end
+        if math.abs(left_y) > deadzone then
+            vy = left_y * self.speed
+        end
+    end
+
     self.collider:setLinearVelocity(vx, vy)
 
     local px, py = self.collider:getPosition()
@@ -139,9 +163,26 @@ function Player:updateCharging(dt)
 end
 
 function Player:updateRepeller(dt, px, py)
-    -- Atualizar ângulo do repeller para apontar para o mouse
-    local mx, my = love.mouse.getPosition()
-    local new_angle = math.atan2(my - py, mx - px)
+    local new_angle = self.repeller_orbital_angle -- Manter a posição atual por padrão
+
+    -- Tentar usar o direcional analógico direito primeiro
+    local gamepad = love.joystick.getJoysticks()[1]
+    if gamepad then
+        local right_x = gamepad:getAxis(3) -- Eixo X do direcional direito
+        local right_y = gamepad:getAxis(4) -- Eixo Y do direcional direito
+
+        -- Aplicar deadzone para evitar movimento involuntário
+        local deadzone = 0.2
+        if math.abs(right_x) > deadzone or math.abs(right_y) > deadzone then
+            new_angle = math.atan2(right_y, right_x)
+        end
+        -- Se não há input do gamepad, manter a posição atual (não usar mouse)
+    else
+        -- Se não há gamepad, usar o mouse
+        local mx, my = love.mouse.getPosition()
+        new_angle = math.atan2(my - py, mx - px)
+    end
+
     -- Detectar movimento do ângulo
     if math.abs(new_angle - (self._last_angle or 0)) > 0.01 then
         self.repeller_visible = true
@@ -231,25 +272,68 @@ function Player:showRepellerOnCollision()
     self.repeller_timer = 2
 end
 
+function Player:fireDown()
+    self.charging = true
+    self.charge_timer = 0
+    self.charge_ready = false
+end
+
+function Player:fireUp()
+    if self.charge_ready then
+        self:shoot(true)
+    else
+        self:shoot(false)
+    end
+    self.charging = false
+    self.charge_timer = 0
+    self.charge_ready = false
+end
 function Player:keypressed(key)
     if key == 'b' or key == 'y' then
-        self.charging = true
-        self.charge_timer = 0
-        self.charge_ready = false
+        self:fireDown()
     end
 end
 
 function Player:keyreleased(key)
     if (key == 'b' or key == 'y') then
-        if self.charge_ready then
-            self:shoot(true)
-        else
-            self:shoot(false)
-        end
-        self.charging = false
-        self.charge_timer = 0
-        self.charge_ready = false
+        self:fireUp()
     end
+end
+
+function Player:gamepadpressed(joystick, button)
+    if button == 'dpup' then
+        self.movingUp = true
+    elseif button == 'dpdown' then
+        self.movingDown = true
+    elseif button == 'dpleft' then
+        self.movingLeft = true
+    elseif button == 'dpright'then
+        self.movingRight = true
+    elseif button == 'x' then
+        self:fireDown()
+    end
+end
+
+function Player:gamepadreleased(joystick, button)
+    if button == 'dpup' then
+        self.movingUp = false
+    elseif button == 'dpdown' then
+        self.movingDown = false
+    elseif button == 'dpleft' then
+        self.movingLeft = false
+    elseif button == 'dpright'then
+        self.movingRight = false
+    elseif button == 'x' then
+        self:fireUp()
+    end
+end
+
+function Player:joystickpressed(joystick, button)
+    -- Implementação vazia
+end
+
+function Player:joystickreleased(joystick, button)
+    -- Implementação vazia
 end
 
 return Player
