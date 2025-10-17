@@ -140,10 +140,25 @@ game.beginContact = function(a, b, coll)
             local dx, dy = px - rx, py - ry
             local dist = math.sqrt(dx*dx + dy*dy)
             if dist > 0 then
-                -- Normalizar e aplicar força
-                local force = 200 -- força de repulsão
-                local fx, fy = (dx/dist) * force, (dy/dist) * force
+                -- Normalizar direção
+                local nx, ny = dx/dist, dy/dist
+
+                -- Calcular força baseada na distância (mais próximo = mais força)
+                local min_dist = 20 -- distância mínima para força máxima
+                local max_dist = 60 -- distância máxima para força mínima
+                local force_multiplier = math.max(0, math.min(1, (max_dist - dist) / (max_dist - min_dist)))
+
+                -- Aplicar força de repulsão
+                local base_force = 300
+                local force = base_force * force_multiplier
+                local fx, fy = nx * force, ny * force
+
+                -- Aplicar impulso linear
                 projectileCollider:applyLinearImpulse(fx, fy)
+
+                -- Adicionar um pouco de rotação para efeito visual
+                local angular_impulse = (math.random() - 0.5) * 1000
+                projectileCollider:applyAngularImpulse(angular_impulse)
             end
         end
 

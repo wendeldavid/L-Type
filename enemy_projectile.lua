@@ -8,9 +8,10 @@ function EnemyProjectile:new(world, x, y, vx, vy)
     obj.collider:setFixedRotation(false) -- Permitir rotação para ricochete
     obj.collider:setCollisionClass('EnemyProjectile')
     obj.collider:setUserData({collision_class = 'EnemyProjectile'})
-    -- obj.collider:setRestitution(0.6) -- Reduzir restituição para melhor controle
-    -- obj.collider:setLinearDamping(0.1) -- Adicionar amortecimento linear
-    -- obj.collider:setAngularDamping(0.5) -- Adicionar amortecimento angular
+    obj.collider:setRestitution(0.8) -- Aumentar restituição para melhor ricochete
+    obj.collider:setLinearDamping(0.05) -- Reduzir amortecimento linear para manter movimento
+    obj.collider:setAngularDamping(0.3) -- Reduzir amortecimento angular para rotação
+    obj.collider:setFriction(0.1) -- Baixa fricção para movimento mais fluido
 
     obj.vx = vx or 0
     obj.vy = vy or 0
