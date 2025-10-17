@@ -99,10 +99,29 @@ end
 
 function Player:update(dt)
     local vx, vy = 0, 0
+
+    -- Controle digital (teclado + direcional digital do gamepad)
     if self:isMovingUp() then vy = -self.speed end
     if self:isMovingDown() then vy = self.speed end
     if self:isMovingLeft() then vx = -self.speed end
     if self:isMovingRight() then vx = self.speed end
+
+    -- Controle analógico (direcional analógico esquerdo do gamepad)
+    local gamepad = love.joystick.getJoysticks()[1] -- Primeiro gamepad conectado
+    if gamepad then
+        local left_x = gamepad:getAxis(1) -- Eixo X do direcional esquerdo
+        local left_y = gamepad:getAxis(2) -- Eixo Y do direcional esquerdo
+
+        -- Aplicar deadzone para evitar movimento involuntário
+        local deadzone = 0.2
+        if math.abs(left_x) > deadzone then
+            vx = left_x * self.speed
+        end
+        if math.abs(left_y) > deadzone then
+            vy = left_y * self.speed
+        end
+    end
+
     self.collider:setLinearVelocity(vx, vy)
 
     local px, py = self.collider:getPosition()
@@ -144,9 +163,26 @@ function Player:updateCharging(dt)
 end
 
 function Player:updateRepeller(dt, px, py)
-    -- Atualizar ângulo do repeller para apontar para o mouse
-    local mx, my = love.mouse.getPosition()
-    local new_angle = math.atan2(my - py, mx - px)
+    local new_angle = self.repeller_orbital_angle -- Manter a posição atual por padrão
+
+    -- Tentar usar o direcional analógico direito primeiro
+    local gamepad = love.joystick.getJoysticks()[1]
+    if gamepad then
+        local right_x = gamepad:getAxis(3) -- Eixo X do direcional direito
+        local right_y = gamepad:getAxis(4) -- Eixo Y do direcional direito
+
+        -- Aplicar deadzone para evitar movimento involuntário
+        local deadzone = 0.2
+        if math.abs(right_x) > deadzone or math.abs(right_y) > deadzone then
+            new_angle = math.atan2(right_y, right_x)
+        end
+        -- Se não há input do gamepad, manter a posição atual (não usar mouse)
+    else
+        -- Se não há gamepad, usar o mouse
+        local mx, my = love.mouse.getPosition()
+        new_angle = math.atan2(my - py, mx - px)
+    end
+
     -- Detectar movimento do ângulo
     if math.abs(new_angle - (self._last_angle or 0)) > 0.01 then
         self.repeller_visible = true
