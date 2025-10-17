@@ -26,3 +26,9 @@ To create a binary or `.love` file, run `make`. This will package "L-Type.love" 
 ## Copy to R36S
 
 If you develop on linux, and want to install this game on R36S partition, just run `make deploy`
+
+## Copy to Nintendo Switch homebrew
+
+This port is possible due to [nx-port](https://github.com/retronx-team/love-nx).
+
+To run this game in Switch, first need to install the nx-port. Visit the release page and download the `.nro`, then copy to `switch` folder inside SD card. Then build this repo and copy the `game.love` in the same folder.
