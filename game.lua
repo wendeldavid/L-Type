@@ -31,8 +31,6 @@ game.flash_on = false
 
 function game:enter()
     self.fpsFont = love.graphics.newFont(28)
-    -- Reforçar inicialização de variáveis essenciais
-    self.enemies = {}
     if music and music:isPlaying() then
         music:stop()
     end
@@ -45,7 +43,6 @@ function game:enter()
     self.world = wf.newWorld(0, 0, true)
     self.world:setQueryDebugDrawing(false)
 
-
     -- Definir classes de colisão
     self.world:addCollisionClass('Player')
     self.world:addCollisionClass('Enemy', {ignores = {'Enemy'}})
@@ -55,10 +52,6 @@ function game:enter()
     self.world:addCollisionClass('Terrain')
 
     self.player = Player:new(self.world, 50, 480/2 - 15)
-    self.enemies = {}
-    self.enemy_projectiles = {}
-    self.spawn_timer = 0
-    self.spawn_interval = 6
 
     -- Callback de colisão seguro
     self.world:setCallbacks(game.beginContact)
@@ -165,13 +158,10 @@ end
 function game:update(dt)
     self.world:update(dt) -- Atualizar o mundo de física
     self.player:update(dt)
-    self.current_stage:update(dt)
+    self.current_stage:update(dt, self.player, self.world)
 
     -- Proteger contra update após leave
-    if not self.enemies or not self.player or not self.world then return end
-
-    -- Destruir projéteis inimigos marcados para destruição (seguro fora do callback)
-    if not self.enemies then return end
+    if not self.player or not self.world then return end
 
     -- Controle do efeito de flash
     if self.flash_active then
@@ -211,53 +201,6 @@ function game:update(dt)
         return
     end
 
-    if not self.enemies then return end
-    local i = 1
-    while i <= #self.enemies do
-        local enemy = self.enemies[i]
-        if enemy.collider and enemy.collider:isDestroyed() then
-            table.remove(self.enemies, i)
-        else
-            enemy.shoot_timer = (enemy.shoot_timer or 0) + dt
-            -- Apenas mover o inimigo, não atualizar projéteis aqui
-            enemy.collider:setX(enemy.collider:getX() - enemy.speed * dt)
-            if enemy.shoot_timer >= 2 then
-                enemy.shoot_timer = 0
-                local projectile = enemy:shootAtPlayer(self.player)
-                table.insert(self.enemy_projectiles, projectile)
-            end
-            i = i + 1
-        end
-    end
-
-    -- Atualizar todos os projéteis inimigos independentemente do inimigo estar vivo
-    for i = #self.enemy_projectiles, 1, -1 do
-        local proj = self.enemy_projectiles[i]
-        if proj.collider and not proj.collider:isDestroyed() then
-            -- Verificar se o projétil foi marcado para destruição
-            local ud = proj.collider:getUserData()
-            if ud and ud._to_destroy then
-                proj.collider:destroy()
-                table.remove(self.enemy_projectiles, i)
-            else
-                proj:update(dt)
-                -- projectile out of screen
-                if proj.collider:getX() < 0 or proj.collider:getX() > 640 or proj.collider:getY() < 0 or proj.collider:getY() > 480 then
-                    proj.collider:destroy()
-                    table.remove(self.enemy_projectiles, i)
-                end
-            end
-        else
-            table.remove(self.enemy_projectiles, i)
-        end
-    end
-    -- Spawn de enemies
-    self.spawn_timer = self.spawn_timer + dt
-    if self.spawn_timer >= self.spawn_interval then
-        self.spawn_timer = 0
-        local iy = math.random(15, 480-15)
-        table.insert(self.enemies, Enemy:new(self.world, 640-40, iy))
-    end
 
 end
 
@@ -316,16 +259,6 @@ function game:draw()
     love.graphics.print(scoreText, sw - fw - 10, 10)
 
     self.player:draw()
-    for _, e in ipairs(self.enemies) do
-        e:draw()
-    end
-
-    -- Desenhar projéteis inimigos
-    for _, proj in ipairs(self.enemy_projectiles) do
-        if proj.collider and not proj.collider:isDestroyed() then
-            proj:draw()
-        end
-    end
 
     self:drawFPS()
 
@@ -352,7 +285,6 @@ function game:leave()
     -- Limpar referências para liberar memória
     self.world = nil
     self.player = nil
-    self.enemies = nil
     self.score = 0
     self.flash_active = false
     self.flash_timer = 0

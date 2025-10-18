@@ -1,6 +1,8 @@
 -- Stage-01 herda comportamentos de game.lua e adiciona o mapa
 local sti = require("libs.Simple-Tiled-Implementation.sti.init")
 
+local Enemy = require 'enemy'
+
 local stage = {
     map_offset = 0,
     colliders = {},
@@ -9,7 +11,11 @@ local stage = {
     planet_y = nil,
     particles = {},
     particle_timer = 0,
-    particle_interval = 0.2
+    particle_interval = 0.2,
+    enemies = {},
+    enemy_projectiles = {},
+    spawn_timer = 0,
+    spawn_interval = 6
 }
 
 function stage:enter(world)
@@ -27,6 +33,12 @@ function stage:enter(world)
     self.particle_timer = 0
     self.particle_interval = 0.2
     self.particles = {}
+
+    -- Inicializar variáveis de inimigos
+    self.enemies = {}
+    self.enemy_projectiles = {}
+    self.spawn_timer = 0
+    self.spawn_interval = 6
 
     stage.terraincolliders = {}
     for _, obj in ipairs(self.map.layers["terrain_layer"].objects) do
@@ -52,7 +64,7 @@ function stage:enter(world)
     end
 end
 
-function stage:update(dt)
+function stage:update(dt, player, world)
 	if self.map then self.map:update(dt) end
 
 	-- Move o mapa da direita para a esquerda
@@ -86,6 +98,57 @@ function stage:update(dt)
         local x, y = collider:getPosition()
         collider:setPosition(x - (dt * 10), y)
     end
+
+    -- Atualizar inimigos
+    if player then
+        local i = 1
+        while i <= #self.enemies do
+            local enemy = self.enemies[i]
+            if enemy.collider and enemy.collider:isDestroyed() then
+                table.remove(self.enemies, i)
+            else
+                enemy.shoot_timer = (enemy.shoot_timer or 0) + dt
+                -- Apenas mover o inimigo, não atualizar projéteis aqui
+                enemy.collider:setX(enemy.collider:getX() - enemy.speed * dt)
+                if enemy.shoot_timer >= 2 then
+                    enemy.shoot_timer = 0
+                    local projectile = enemy:shootAtPlayer(player)
+                    table.insert(self.enemy_projectiles, projectile)
+                end
+                i = i + 1
+            end
+        end
+
+        -- Atualizar todos os projéteis inimigos independentemente do inimigo estar vivo
+        for i = #self.enemy_projectiles, 1, -1 do
+            local proj = self.enemy_projectiles[i]
+            if proj.collider and not proj.collider:isDestroyed() then
+                -- Verificar se o projétil foi marcado para destruição
+                local ud = proj.collider:getUserData()
+                if ud and ud._to_destroy then
+                    proj.collider:destroy()
+                    table.remove(self.enemy_projectiles, i)
+                else
+                    proj:update(dt)
+                    -- projectile out of screen
+                    if proj.collider:getX() < 0 or proj.collider:getX() > 640 or proj.collider:getY() < 0 or proj.collider:getY() > 480 then
+                        proj.collider:destroy()
+                        table.remove(self.enemy_projectiles, i)
+                    end
+                end
+            else
+                table.remove(self.enemy_projectiles, i)
+            end
+        end
+
+        -- Spawn de enemies
+        self.spawn_timer = self.spawn_timer + dt
+        if self.spawn_timer >= self.spawn_interval then
+            self.spawn_timer = 0
+            local iy = math.random(15, 480-15)
+            table.insert(self.enemies, Enemy:new(world, 640-40, iy))
+        end
+    end
 end
 
 function stage:draw()
@@ -115,6 +178,18 @@ function stage:draw()
     for _, p in ipairs(self.particles) do
         if p.size <= 2 then
             love.graphics.circle('fill', p.x, p.y, p.size)
+        end
+    end
+
+    -- Desenhar inimigos
+    for _, e in ipairs(self.enemies) do
+        e:draw()
+    end
+
+    -- Desenhar projéteis inimigos
+    for _, proj in ipairs(self.enemy_projectiles) do
+        if proj.collider and not proj.collider:isDestroyed() then
+            proj:draw()
         end
     end
 
