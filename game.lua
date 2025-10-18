@@ -33,7 +33,6 @@ function game:enter()
     self.fpsFont = love.graphics.newFont(28)
     -- Reforçar inicialização de variáveis essenciais
     self.enemies = {}
-    self.particles = {}
     if music and music:isPlaying() then
         music:stop()
     end
@@ -46,10 +45,6 @@ function game:enter()
     self.world = wf.newWorld(0, 0, true)
     self.world:setQueryDebugDrawing(false)
 
-    -- Inicializar variáveis de partículas
-    self.particle_timer = 0
-    self.particle_interval = 0.2
-    self.particles = {}
 
     -- Definir classes de colisão
     self.world:addCollisionClass('Player')
@@ -68,8 +63,7 @@ function game:enter()
     -- Callback de colisão seguro
     self.world:setCallbacks(game.beginContact)
 
-    -- Carregar imagem do planeta e fonte do FPS uma vez
-    self.planet_img = love.graphics.newImage('assets/sprites/planet_1.png')
+    -- Carregar fonte do FPS uma vez
 
     self.current_stage:enter(self.world)
 end
@@ -173,14 +167,6 @@ function game:update(dt)
     self.player:update(dt)
     self.current_stage:update(dt)
 
-    -- Atualizar posição do planeta (mais devagar)
-    if not self.planet_x then
-        local screen_w = love.graphics.getWidth()
-        self.planet_x = screen_w - 50
-    end
-    if not self.planet_y then self.planet_y = 240 end
-    self.planet_x = self.planet_x - dt * 2 -- velocidade de 2px/s para a esquerda
-
     -- Proteger contra update após leave
     if not self.enemies or not self.player or not self.world then return end
 
@@ -273,7 +259,6 @@ function game:update(dt)
         table.insert(self.enemies, Enemy:new(self.world, 640-40, iy))
     end
 
-    self:updateParticles(dt) -- Atualizar partículas
 end
 
 function game:keypressed(key)
@@ -312,27 +297,6 @@ function game:gamepadreleased(gamepad, button)
     self.player:gamepadreleased(gamepad, button)
 end
 
-function game:updateParticles(dt)
-    self.particle_timer = self.particle_timer + dt
-    if self.particle_timer >= self.particle_interval then
-        self.particle_timer = 0
-        local particle = {
-            x = 640,
-            y = math.random(0, 480),
-            size = math.random(1, 3),
-            speed = math.random(30, 60)
-        }
-        table.insert(self.particles, particle)
-    end
-
-    for i = #self.particles, 1, -1 do
-        local p = self.particles[i]
-        p.x = p.x - p.speed * dt
-        if p.x + p.size < 0 then
-            table.remove(self.particles, i)
-        end
-    end
-end
 
 function game:draw()
     -- Efeito de flash na tela
@@ -342,34 +306,7 @@ function game:draw()
         love.graphics.clear(0, 0, 0) -- Preto padrão
     end
 
-    -- Desenhar partículas maiores (atrás do planeta)
-    love.graphics.setColor(1, 1, 1)
-    for _, p in ipairs(self.particles) do
-        if p.size > 2 then
-            love.graphics.circle('fill', p.x, p.y, p.size)
-        end
-    end
-
     self.current_stage:draw()
-
-    -- Desenhar planeta entre partículas e objetos
-    if not self.planet_x then self.planet_x = 320 end
-    if not self.planet_y then self.planet_y = 240 end
-    local planet_img = self.planet_img
-    local pw, ph = planet_img:getWidth(), planet_img:getHeight()
-    local px, py = self.planet_x or 320, self.planet_y or 240
-    local max_w = 128
-    local scale = max_w / pw
-    love.graphics.setColor(1,1,1,0.8)
-    love.graphics.draw(planet_img, px, py, 0, scale, scale, pw/2, ph/2)
-    love.graphics.setColor(1,1,1,1)
-
-    -- Desenhar partículas menores (à frente do planeta)
-    for _, p in ipairs(self.particles) do
-        if p.size <= 2 then
-            love.graphics.circle('fill', p.x, p.y, p.size)
-        end
-    end
 
     -- Exibir score
     love.graphics.setColor(1, 1, 1)
@@ -416,7 +353,6 @@ function game:leave()
     self.world = nil
     self.player = nil
     self.enemies = nil
-    self.particles = nil
     self.score = 0
     self.flash_active = false
     self.flash_timer = 0
