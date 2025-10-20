@@ -1,4 +1,5 @@
 local Gamestate = require 'libs.hump.gamestate'
+local input = require 'input'
 
 local options = {
     master_volume = 0.5,
@@ -7,6 +8,16 @@ local options = {
 }
 
 local font = love.graphics.newFont('assets/fonts/starkwalker_classic/StarkwalkerClassic.otf', 32)
+
+function options:enter()
+    -- Configurar callbacks de input
+    self:setup_input_callbacks()
+end
+
+function options:leave()
+    -- Limpar callbacks de input
+    input:clear_callbacks()
+end
 
 local getControls = function()
     if BUILD_TYPE == 'portable' then
@@ -88,32 +99,40 @@ function options:drawVolumeSlider()
     love.graphics.printf(string.format("Volume", math.floor(value*100)), 0, slider_y - 36, 640, 'center')
 end
 
-function options:keypressed(key)
-    if key == 'escape' then
+-- Configurar callbacks de input
+function options:setup_input_callbacks()
+    -- Callback de cancelamento (voltar ao menu)
+    input:set_callback('cancel', function()
         Gamestate.switch(require('menu'))
-    elseif key == 'left' then
+    end)
+
+    -- Callbacks de navegação (ajustar volume)
+    input:set_callback('navigate_left', function()
         options.master_volume = math.max(0, (options.master_volume or 0) - 0.05)
         love.audio.setVolume(options.master_volume)
-    elseif key == 'right' then
+    end)
+
+    input:set_callback('navigate_right', function()
         options.master_volume = math.min(1, (options.master_volume or 0) + 0.05)
         love.audio.setVolume(options.master_volume)
-    end
+    end)
+end
+
+-- Delegar input para o sistema centralizado
+function options:keypressed(key)
+    input:keypressed(key)
 end
 
 function options:joystickpressed(joystick, button)
-
+    input:joystickpressed(joystick, button)
 end
 
 function options:gamepadpressed(gamepad, button)
-    if button == 'back' then
-        Gamestate.switch(require('menu'))
-    elseif button == 'dpleft' then
-        options.master_volume = math.max(0, (options.master_volume or 0) - 0.05)
-        love.audio.setVolume(options.master_volume)
-    elseif button == 'dpright' then
-        options.master_volume = math.min(1, (options.master_volume or 0) + 0.05)
-        love.audio.setVolume(options.master_volume)
-    end
+    input:gamepadpressed(gamepad, button)
+end
+
+function options:mousepressed(x, y, button)
+    input:mousepressed(x, y, button)
 end
 
 return options

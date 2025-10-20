@@ -6,6 +6,7 @@ local width, height = 640, 480
 local Gamestate = require 'libs.hump.gamestate'
 local credits = require('credits')
 local options = require('options')
+local input = require('input')
 local game = require('game')
 local menu = require('menu')
 local build_type = require('build_type')
@@ -19,6 +20,19 @@ Gamestate.registerState('options', options)
 Gamestate.registerState('credits', credits)
 Gamestate.registerState('game', game)
 Gamestate.registerState('menu', menu)
+
+function love.load()
+    love.window.setMode(width, height)
+    Gamestate.registerEvents()
+    Gamestate.switch(menu)
+end
+
+function love.draw()
+    Gamestate.draw()
+    drawInputHistory()
+end
+
+--
 
 -- Função para adicionar input ao histórico
 function addInput(input)
@@ -45,30 +59,19 @@ function drawInputHistory()
     end
 end
 
-function love.load()
-    love.window.setMode(width, height)
-    Gamestate.registerEvents()
-    Gamestate.switch(menu)
-end
-
 function love.keypressed(key)
     addInput(key)
-    -- Gamestate.keypressed(key)
+    input:keypressed(key)
 end
 
 function love.joystickpressed(joystick, button)
     addInput('joystick '..button)
-    -- Gamestate.joystickpressed(joystick, button)
+    input:joystickpressed(joystick, button)
 end
 
 function love.gamepadpressed(gamepad, button)
     addInput('gamepad '..button)
-    -- Gamestate.gamepadpressed(gamepad, button)
-end
-
-function love.draw()
-    Gamestate.draw()
-    drawInputHistory()
+    input:gamepadpressed(gamepad, button)
 end
 
 BUILD_TYPE = build_type

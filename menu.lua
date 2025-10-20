@@ -1,5 +1,6 @@
 local Gamestate = require 'libs.hump.gamestate'
 local options = require 'options'
+local input = require 'input'
 
 local menu = {selected = 1}
 local music
@@ -16,15 +17,30 @@ function menu:enter()
     if not music:isPlaying() then
         music:play()
     end
+
+    -- Configurar callbacks de input
+    self:setup_input_callbacks()
 end
 
 function menu:leave()
     if music and music:isPlaying() then
         music:stop()
     end
+    -- Limpar callbacks de input
+    input:clear_callbacks()
+end
+
+function menu:update(dt)
+    -- Atualizar sistema de input (Konami code timeout)
+    input:update(dt)
 end
 
 function menu:draw()
+    -- Render OS info in upper right corner
+    love.graphics.setColor(0.7, 0.7, 0.7)
+    local osText = "OS: " .. love.system.getOS()
+    love.graphics.print(osText, 10, 10)
+
     local oldFont = love.graphics.getFont()
 
     love.graphics.setFont(menuTitleFont)
@@ -42,17 +58,33 @@ function menu:draw()
         end
         love.graphics.printf(item, 0, 480/2-20 + (i-1)*40, 640, 'center')
     end
+
     love.graphics.setFont(oldFont)
 end
 
-function menu:keypressed(key)
-    if key == 'up' or key == 'w' then
+-- Configurar callbacks de input
+function menu:setup_input_callbacks()
+    -- Callback do Konami code
+    input:set_konami_callback(function()
+        print("Konami code detected")
+    end)
+
+    -- Callbacks de navegação (agnósticos ao dispositivo)
+    -- Funciona com: ↑/W (teclado), dpup (gamepad), qualquer botão (joystick)
+    input:set_callback('navigate_up', function()
         self.selected = self.selected - 1
         if self.selected < 1 then self.selected = 3 end
-    elseif key == 'down' or key == 's' then
+    end)
+
+    -- Funciona com: ↓/S (teclado), dpdown (gamepad), qualquer botão (joystick)
+    input:set_callback('navigate_down', function()
         self.selected = self.selected + 1
         if self.selected > 3 then self.selected = 1 end
-    elseif key == 'return' or key == 'kpenter' then
+    end)
+
+    -- Callback de confirmação (agnóstico ao dispositivo)
+    -- Funciona com: Enter/Space (teclado), A/Start (gamepad), botões 1/2 (joystick)
+    input:set_callback('confirm', function()
         if self.selected == 1 then
             Gamestate.switch(require('game'))
         elseif self.selected == 2 then
@@ -60,31 +92,13 @@ function menu:keypressed(key)
         elseif self.selected == 3 then
             Gamestate.switch(require('credits'))
         end
-    elseif key == 'escape' then
+    end)
+
+    -- Callback de cancelamento (agnóstico ao dispositivo)
+    -- Funciona com: Esc (teclado), Back/Select (gamepad), botões 3/4 (joystick)
+    input:set_callback('cancel', function()
         love.event.quit()
-    end
+    end)
 end
 
-function menu:joystickpressed(joystick, button)
-end
-
-function menu:gamepadpressed(gamepad, button)
-    if button == 'dpup' then
-        self.selected = self.selected - 1
-        if self.selected < 1 then self.selected = 3 end
-    elseif button == 'dpdown' then
-        self.selected = self.selected + 1
-        if self.selected > 3 then self.selected = 1 end
-    elseif button == 'a' or button == 'start' then
-        if self.selected == 1 then
-            Gamestate.switch(require('game'))
-        elseif self.selected == 2 then
-            Gamestate.switch(require('options'))
-        elseif self.selected == 3 then
-            Gamestate.switch(require('credits'))
-        end
-    elseif button == 'back' or button == 'select' then
-        love.event.quit()
-    end
-end
 return menu
