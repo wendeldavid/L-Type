@@ -5,6 +5,7 @@ local input = {
 
     -- Callbacks para diferentes ações
     callbacks = {
+        -- Navegação de menu
         navigate_up = nil,
         navigate_down = nil,
         navigate_left = nil,
@@ -12,7 +13,23 @@ local input = {
         confirm = nil,
         cancel = nil,
         pause = nil,
-        quit = nil
+        quit = nil,
+
+        -- Controles de jogo
+        move_up = nil,
+        move_down = nil,
+        move_left = nil,
+        move_right = nil,
+        move_up_release = nil,
+        move_down_release = nil,
+        move_left_release = nil,
+        move_right_release = nil,
+        fire_start = nil,
+        fire_end = nil,
+        repeller_up = nil,
+        repeller_down = nil,
+        repeller_left = nil,
+        repeller_right = nil
     },
 
     -- Konami code
@@ -25,47 +42,113 @@ local input = {
 
 -- Mapeamento de teclas para ações
 local key_mappings = {
-    -- Navegação
+    -- Navegação de menu
     navigate_up = {'up', 'w'},
     navigate_down = {'down', 's'},
     navigate_left = {'left', 'a'},
     navigate_right = {'right', 'd'},
 
-    -- Ações
+    -- Ações de menu
     confirm = {'return', 'kpenter', 'space'},
     cancel = {'escape'},
     pause = {'p'},
-    quit = {'q'}
+    quit = {'q'},
+
+    -- Controles de jogo - movimento
+    move_up = {'up', 'w'},
+    move_down = {'down', 's'},
+    move_left = {'left', 'a'},
+    move_right = {'right', 'd'},
+
+    -- Controles de jogo - movimento release
+    move_up_release = {'up', 'w'},
+    move_down_release = {'down', 's'},
+    move_left_release = {'left', 'a'},
+    move_right_release = {'right', 'd'},
+
+    -- Controles de jogo - tiro
+    fire_start = {'b', 'y'},
+    fire_end = {'b', 'y'},
+
+    -- Controles de jogo - repeller (teclas numéricas)
+    repeller_up = {'8'},
+    repeller_down = {'2'},
+    repeller_left = {'4'},
+    repeller_right = {'6'}
 }
 
 -- Mapeamento de botões de gamepad para ações
 local gamepad_mappings = {
-    -- Navegação
+    -- Navegação de menu
     navigate_up = {'dpup'},
     navigate_down = {'dpdown'},
     navigate_left = {'dpleft'},
     navigate_right = {'dpright'},
 
-    -- Ações
+    -- Ações de menu
     confirm = {'a', 'start'},
     cancel = {'back', 'select'},
     pause = {'start'},
-    quit = {'back'}
+    quit = {'back'},
+
+    -- Controles de jogo - movimento
+    move_up = {'dpup'},
+    move_down = {'dpdown'},
+    move_left = {'dpleft'},
+    move_right = {'dpright'},
+
+    -- Controles de jogo - movimento release
+    move_up_release = {'dpup'},
+    move_down_release = {'dpdown'},
+    move_left_release = {'dpleft'},
+    move_right_release = {'dpright'},
+
+    -- Controles de jogo - tiro
+    fire_start = {'x', 'y'},
+    fire_end = {'x', 'y'},
+
+    -- Controles de jogo - repeller (botões do gamepad)
+    repeller_up = {'y'},
+    repeller_down = {'a'},
+    repeller_left = {'x'},
+    repeller_right = {'b'}
 }
 
 -- Mapeamento de botões de joystick para ações
 local joystick_mappings = {
-    -- Navegação (botões numéricos comuns)
+    -- Navegação de menu (botões numéricos comuns)
     navigate_up = {'1', '2', '3', '4', '5', '6', '7', '8'},
     navigate_down = {'1', '2', '3', '4', '5', '6', '7', '8'},
     navigate_left = {'1', '2', '3', '4', '5', '6', '7', '8'},
     navigate_right = {'1', '2', '3', '4', '5', '6', '7', '8'},
 
-    -- Ações
+    -- Ações de menu
     confirm = {'1', '2'},
     cancel = {'3', '4'},
     pause = {'5', '6'},
-    quit = {'7', '8'}
+    quit = {'7', '8'},
+
+    -- Controles de jogo - movimento
+    move_up = {'1', '2', '3', '4', '5', '6', '7', '8'},
+    move_down = {'1', '2', '3', '4', '5', '6', '7', '8'},
+    move_left = {'1', '2', '3', '4', '5', '6', '7', '8'},
+    move_right = {'1', '2', '3', '4', '5', '6', '7', '8'},
+
+    -- Controles de jogo - movimento release
+    move_up_release = {'1', '2', '3', '4', '5', '6', '7', '8'},
+    move_down_release = {'1', '2', '3', '4', '5', '6', '7', '8'},
+    move_left_release = {'1', '2', '3', '4', '5', '6', '7', '8'},
+    move_right_release = {'1', '2', '3', '4', '5', '6', '7', '8'},
+
+    -- Controles de jogo - tiro
+    fire_start = {'1', '2'},
+    fire_end = {'1', '2'},
+
+    -- Controles de jogo - repeller
+    repeller_up = {'1', '2'},
+    repeller_down = {'3', '4'},
+    repeller_left = {'5', '6'},
+    repeller_right = {'7', '8'}
 }
 
 -- Função para verificar se uma tecla/botão corresponde a uma ação
@@ -227,6 +310,43 @@ function input:gamepadpressed(gamepad, button)
     -- Verificar ações normais
     for action, _ in pairs(self.callbacks) do
         if self:is_action_pressed(button, action) then
+            self:execute_callback(action)
+            break
+        end
+    end
+end
+
+-- Handlers para eventos de soltar tecla/botão
+function input:keyreleased(key)
+    -- Ações que precisam de keyreleased (fire_end e movimento release)
+    local release_actions = {'fire_end', 'move_up_release', 'move_down_release', 'move_left_release', 'move_right_release'}
+
+    for _, action in ipairs(release_actions) do
+        if self.callbacks[action] and self:is_action_pressed(key, action) then
+            self:execute_callback(action)
+            break
+        end
+    end
+end
+
+function input:gamepadreleased(gamepad, button)
+    -- Ações que precisam de gamepadreleased (fire_end e movimento release)
+    local release_actions = {'fire_end', 'move_up_release', 'move_down_release', 'move_left_release', 'move_right_release'}
+
+    for _, action in ipairs(release_actions) do
+        if self.callbacks[action] and self:is_action_pressed(button, action) then
+            self:execute_callback(action)
+            break
+        end
+    end
+end
+
+function input:joystickreleased(joystick, button)
+    -- Ações que precisam de joystickreleased (fire_end e movimento release)
+    local release_actions = {'fire_end', 'move_up_release', 'move_down_release', 'move_left_release', 'move_right_release'}
+    
+    for _, action in ipairs(release_actions) do
+        if self.callbacks[action] and self:is_action_pressed(button, action) then
             self:execute_callback(action)
             break
         end
