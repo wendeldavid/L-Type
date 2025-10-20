@@ -1,7 +1,6 @@
 local Gamestate = require 'libs.hump.gamestate'
 local wf = require 'libs.windfield.windfield'
 local Player = require 'player'
-local Enemy = require 'enemy'
 local paused = require 'paused'
 local game_over = require 'game_over'
 local finished = require 'finished'
