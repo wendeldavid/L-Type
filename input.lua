@@ -37,7 +37,12 @@ local input = {
     konami_progress = 0,
     konami_timeout = 0,
     konami_timeout_duration = 3,
-    konami_callback = nil
+    konami_callback = nil,
+
+    -- Controle do direcional analógico
+    analog_last_state = {x = 0, y = 0},
+    analog_cooldown = 0,
+    analog_cooldown_duration = 0.2 -- 200ms entre movimentos
 }
 
 -- Mapeamento de teclas para ações
@@ -150,6 +155,72 @@ local joystick_mappings = {
     repeller_left = {'5', '6'},
     repeller_right = {'7', '8'}
 }
+
+-- Função para verificar movimento do direcional analógico esquerdo
+function input:check_analog_stick()
+    local gamepad = love.joystick.getJoysticks()[1] -- Primeiro gamepad conectado
+    if not gamepad then return end
+
+    local left_x = gamepad:getAxis(1) -- Eixo X do direcional esquerdo
+    local left_y = gamepad:getAxis(2) -- Eixo Y do direcional esquerdo
+
+    -- Aplicar deadzone para evitar movimento involuntário
+    local deadzone = 0.3
+    local threshold = 0.5 -- Threshold para considerar movimento significativo
+
+    -- Verificar se há movimento significativo
+    local has_movement = math.abs(left_x) > deadzone or math.abs(left_y) > deadzone
+
+    -- Se não há movimento, resetar o estado
+    if not has_movement then
+        self.analog_last_state.x = 0
+        self.analog_last_state.y = 0
+        return
+    end
+
+    -- Verificar cooldown
+    if self.analog_cooldown > 0 then
+        return
+    end
+
+    -- Verificar movimento vertical (navegação up/down)
+    if math.abs(left_y) > deadzone then
+        if left_y < -threshold and self.analog_last_state.y >= -threshold then
+            -- Movimento para cima (transição de não-cima para cima)
+            if self.callbacks.navigate_up then
+                self:execute_callback('navigate_up')
+                self.analog_cooldown = self.analog_cooldown_duration
+            end
+        elseif left_y > threshold and self.analog_last_state.y <= threshold then
+            -- Movimento para baixo (transição de não-baixo para baixo)
+            if self.callbacks.navigate_down then
+                self:execute_callback('navigate_down')
+                self.analog_cooldown = self.analog_cooldown_duration
+            end
+        end
+    end
+
+    -- Verificar movimento horizontal (navegação left/right)
+    if math.abs(left_x) > deadzone then
+        if left_x < -threshold and self.analog_last_state.x >= -threshold then
+            -- Movimento para esquerda (transição de não-esquerda para esquerda)
+            if self.callbacks.navigate_left then
+                self:execute_callback('navigate_left')
+                self.analog_cooldown = self.analog_cooldown_duration
+            end
+        elseif left_x > threshold and self.analog_last_state.x <= threshold then
+            -- Movimento para direita (transição de não-direita para direita)
+            if self.callbacks.navigate_right then
+                self:execute_callback('navigate_right')
+                self.analog_cooldown = self.analog_cooldown_duration
+            end
+        end
+    end
+
+    -- Atualizar estado anterior
+    self.analog_last_state.x = left_x
+    self.analog_last_state.y = left_y
+end
 
 -- Função para verificar se uma tecla/botão corresponde a uma ação
 function input:is_action_pressed(input_value, action)
@@ -267,6 +338,7 @@ end
 
 -- Função para atualizar timeout do Konami code
 function input:update(dt)
+    -- Atualizar Konami code timeout
     if self.konami_progress > 0 then
         self.konami_timeout = self.konami_timeout + dt
         if self.konami_timeout >= self.konami_timeout_duration then
@@ -274,6 +346,14 @@ function input:update(dt)
             self.konami_timeout = 0
         end
     end
+
+    -- Atualizar cooldown do direcional analógico
+    if self.analog_cooldown > 0 then
+        self.analog_cooldown = self.analog_cooldown - dt
+    end
+
+    -- Verificar movimento do direcional analógico esquerdo
+    self:check_analog_stick()
 end
 
 -- Handlers de input
@@ -344,7 +424,7 @@ end
 function input:joystickreleased(joystick, button)
     -- Ações que precisam de joystickreleased (fire_end e movimento release)
     local release_actions = {'fire_end', 'move_up_release', 'move_down_release', 'move_left_release', 'move_right_release'}
-    
+
     for _, action in ipairs(release_actions) do
         if self.callbacks[action] and self:is_action_pressed(button, action) then
             self:execute_callback(action)

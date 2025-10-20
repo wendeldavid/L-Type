@@ -294,53 +294,6 @@ function Player:fireUp()
     self.charge_timer = 0
     self.charge_ready = false
 end
-function Player:keypressed(key)
-    if key == 'b' or key == 'y' then
-        self:fireDown()
-    end
-end
-
-function Player:keyreleased(key)
-    if (key == 'b' or key == 'y') then
-        self:fireUp()
-    end
-end
-
-function Player:gamepadpressed(joystick, button)
-    if button == 'dpup' then
-        self.movingUp = true
-    elseif button == 'dpdown' then
-        self.movingDown = true
-    elseif button == 'dpleft' then
-        self.movingLeft = true
-    elseif button == 'dpright'then
-        self.movingRight = true
-    elseif button == 'x' then
-        self:fireDown()
-    end
-end
-
-function Player:gamepadreleased(joystick, button)
-    if button == 'dpup' then
-        self.movingUp = false
-    elseif button == 'dpdown' then
-        self.movingDown = false
-    elseif button == 'dpleft' then
-        self.movingLeft = false
-    elseif button == 'dpright'then
-        self.movingRight = false
-    elseif button == 'x' then
-        self:fireUp()
-    end
-end
-
-function Player:joystickpressed(joystick, button)
-    -- Implementação vazia
-end
-
-function Player:joystickreleased(joystick, button)
-    -- Implementação vazia
-end
 
 -- Configurar callbacks de input centralizado
 function Player:setup_input_callbacks()

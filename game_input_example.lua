@@ -16,6 +16,7 @@ function game_example:enter()
     print("- Movimento: WASD/Setas (teclado), D-pad (gamepad) - SISTEMA CENTRALIZADO")
     print("- Pausa: P (teclado), Start (gamepad) - SISTEMA CENTRALIZADO")
     print("- Menu: Esc (teclado), Back (gamepad) - SISTEMA CENTRALIZADO")
+    print("- Navegação Menu: ↑↓/WS (teclado), D-pad/Analógico (gamepad) - SISTEMA CENTRALIZADO")
     print("- Konami code: ↑↑↓↓←→←→BA")
 end
 
@@ -120,8 +121,9 @@ function game_example:draw()
     love.graphics.print("• Tiro, Repeller, Movimento, Pausa, Menu", 10, 350)
     love.graphics.print("• Lógica movida para player.lua", 10, 370)
     love.graphics.print("• game.lua apenas delega para input.lua", 10, 390)
-    love.graphics.print("", 10, 410)
-    love.graphics.print("Verifique o console para ver os resultados!", 10, 430)
+    love.graphics.print("• Direcional analógico para navegação", 10, 410)
+    love.graphics.print("", 10, 430)
+    love.graphics.print("Verifique o console para ver os resultados!", 10, 450)
 end
 
 return game_example
