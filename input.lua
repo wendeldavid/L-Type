@@ -32,7 +32,7 @@ local input = {
         repeller_right = nil
     },
 
-    -- Konami code
+    -- Konami code (botões serão mapeados dinamicamente para NX)
     konami_sequence = {'up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a'},
     konami_progress = 0,
     konami_timeout = 0,
@@ -236,7 +236,20 @@ function input:is_action_pressed(input_value, action)
     -- Verificar gamepad
     if gamepad_mappings[action] then
         for _, button in ipairs(gamepad_mappings[action]) do
-            if input_value == button then
+            -- Aplicar swap de botões para Nintendo Switch (NX)
+            local mapped_button = button
+            if BUILD_TYPE == 'nx' then
+                if button == 'a' then
+                    mapped_button = 'b'
+                elseif button == 'b' then
+                    mapped_button = 'a'
+                elseif button == 'x' then
+                    mapped_button = 'y'
+                elseif button == 'y' then
+                    mapped_button = 'x'
+                end
+            end
+            if input_value == mapped_button then
                 return true
             end
         end
@@ -320,7 +333,20 @@ end
 
 -- Função para verificar Konami code
 function input:check_konami_code(input_value)
-    if self.konami_sequence[self.konami_progress + 1] == input_value then
+    -- Aplicar swap de botões para Nintendo Switch (NX) no Konami code
+    local mapped_input = input_value
+    if BUILD_TYPE == 'nx' then
+        if input_value == 'a' then
+            mapped_input = 'b'
+        elseif input_value == 'b' then
+            mapped_input = 'a'
+        elseif input_value == 'x' then
+            mapped_input = 'y'
+        elseif input_value == 'y' then
+            mapped_input = 'x'
+        end
+    end
+    if self.konami_sequence[self.konami_progress + 1] == mapped_input then
         self.konami_progress = self.konami_progress + 1
         self.konami_timeout = 0
 

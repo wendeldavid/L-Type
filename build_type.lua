@@ -1,2 +1,2 @@
--- portable, pc
+-- portable, pc, nx, mobile
 return "nx"

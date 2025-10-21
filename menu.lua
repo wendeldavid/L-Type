@@ -49,7 +49,7 @@ function menu:draw()
 
     love.graphics.setFont(menuFont)
 
-    local items = {"Play", "Options", "Credits"}
+    local items = {"Play", "Options", "Credits" }
     for i, item in ipairs(items) do
         if self.selected == i then
             love.graphics.setColor(1, 0.7, 0.2)
@@ -67,6 +67,7 @@ function menu:setup_input_callbacks()
     -- Callback do Konami code
     input:set_konami_callback(function()
         print("Konami code detected")
+        Gamestate.switch(require('jimmypeta'))
     end)
 
     -- Callbacks de navegação (agnósticos ao dispositivo)
