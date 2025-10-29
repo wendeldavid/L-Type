@@ -32,13 +32,6 @@ local input = {
         repeller_right = nil
     },
 
-    -- Konami code (botões serão mapeados dinamicamente para NX)
-    konami_sequence = {'up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a'},
-    konami_progress = 0,
-    konami_timeout = 0,
-    konami_timeout_duration = 3,
-    konami_callback = nil,
-
     -- Controle do direcional analógico
     analog_last_state = {x = 0, y = 0},
     analog_cooldown = 0,
@@ -91,7 +84,7 @@ local gamepad_mappings = {
     navigate_right = {'dpright'},
 
     -- Ações de menu
-    confirm = {'a', 'start'},
+    confirm = {'start'},
     cancel = {'back', 'select'},
     pause = {'start'},
     quit = {'back'},
@@ -326,53 +319,8 @@ function input:get_all_actions()
     return actions
 end
 
--- Função para configurar callback do Konami code
-function input:set_konami_callback(callback_func)
-    self.konami_callback = callback_func
-end
-
--- Função para verificar Konami code
-function input:check_konami_code(input_value)
-    -- Aplicar swap de botões para Nintendo Switch (NX) no Konami code
-    local mapped_input = input_value
-    if BUILD_TYPE == 'nx' then
-        if input_value == 'a' then
-            mapped_input = 'b'
-        elseif input_value == 'b' then
-            mapped_input = 'a'
-        elseif input_value == 'x' then
-            mapped_input = 'y'
-        elseif input_value == 'y' then
-            mapped_input = 'x'
-        end
-    end
-    if self.konami_sequence[self.konami_progress + 1] == mapped_input then
-        self.konami_progress = self.konami_progress + 1
-        self.konami_timeout = 0
-
-        if self.konami_progress == #self.konami_sequence then
-            if self.konami_callback and type(self.konami_callback) == 'function' then
-                self.konami_callback()
-            end
-            self.konami_progress = 0
-        end
-    else
-        self.konami_progress = 0
-        self.konami_timeout = 0
-    end
-end
-
--- Função para atualizar timeout do Konami code
+-- Função para atualizar sistema de input
 function input:update(dt)
-    -- Atualizar Konami code timeout
-    if self.konami_progress > 0 then
-        self.konami_timeout = self.konami_timeout + dt
-        if self.konami_timeout >= self.konami_timeout_duration then
-            self.konami_progress = 0
-            self.konami_timeout = 0
-        end
-    end
-
     -- Atualizar cooldown do direcional analógico
     if self.analog_cooldown > 0 then
         self.analog_cooldown = self.analog_cooldown - dt
@@ -384,40 +332,37 @@ end
 
 -- Handlers de input
 function input:keypressed(key)
-    -- Verificar Konami code primeiro
-    self:check_konami_code(key)
-
     -- Verificar ações normais
-    for action, _ in pairs(self.callbacks) do
-        if self:is_action_pressed(key, action) then
-            self:execute_callback(action)
-            break -- Evitar múltiplas execuções
+    if BUILD_TYPE == 'pc' then
+        for action, _ in pairs(self.callbacks) do
+            if self:is_action_pressed(key, action) then
+                self:execute_callback(action)
+                break -- Evitar múltiplas execuções
+            end
         end
     end
 end
 
 function input:joystickpressed(joystick, button)
-    -- Verificar Konami code primeiro
-    self:check_konami_code(button)
-
     -- Verificar ações normais
-    for action, _ in pairs(self.callbacks) do
-        if self:is_action_pressed(button, action) then
-            self:execute_callback(action)
-            break
+    if BUILD_TYPE == 'portable' or BUILD_TYPE == 'nx' then
+        for action, _ in pairs(self.callbacks) do
+            if self:is_action_pressed(button, action) then
+                self:execute_callback(action)
+                break
+            end
         end
     end
 end
 
 function input:gamepadpressed(gamepad, button)
-    -- Verificar Konami code primeiro
-    self:check_konami_code(button)
-
     -- Verificar ações normais
-    for action, _ in pairs(self.callbacks) do
-        if self:is_action_pressed(button, action) then
-            self:execute_callback(action)
-            break
+    if BUILD_TYPE == 'portable' or BUILD_TYPE == 'nx' then
+        for action, _ in pairs(self.callbacks) do
+            if self:is_action_pressed(button, action) then
+                self:execute_callback(action)
+                break
+            end
         end
     end
 end

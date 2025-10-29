@@ -10,18 +10,20 @@ local input = require('input')
 local game = require('game')
 local menu = require('menu')
 local jimmypeta = require('jimmypeta')
+local jimmypeta_stage = require('jimmypeta_stage')
 local build_type = require('build_type')
 
 -- Sistema de rastreamento de inputs
 local input_history = {}
 local max_inputs = 10
 
--- Register the options, credits, game, menu, and jimmypeta states
+-- Register the options, credits, game, menu, jimmypeta, and jimmypeta_stage states
 Gamestate.registerState('options', options)
 Gamestate.registerState('credits', credits)
 Gamestate.registerState('game', game)
 Gamestate.registerState('menu', menu)
 Gamestate.registerState('jimmypeta', jimmypeta)
+Gamestate.registerState('jimmypeta_stage', jimmypeta_stage)
 
 function love.load()
     love.window.setMode(width, height)
