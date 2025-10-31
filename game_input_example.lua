@@ -17,7 +17,6 @@ function game_example:enter()
     print("- Pausa: P (teclado), Start (gamepad) - SISTEMA CENTRALIZADO")
     print("- Menu: Esc (teclado), Back (gamepad) - SISTEMA CENTRALIZADO")
     print("- Navegação Menu: ↑↓/WS (teclado), D-pad/Analógico (gamepad) - SISTEMA CENTRALIZADO")
-    print("- Konami code: ↑↑↓↓←→←→BA")
 end
 
 function game_example:leave()
@@ -62,11 +61,6 @@ function game_example:setup_input_callbacks()
     
     input:set_callback('cancel', function()
         print("🚪 Voltando ao menu")
-    end)
-    
-    -- Konami code
-    input:set_konami_callback(function()
-        print("🎉 KONAMI CODE ATIVADO! Modo cheater habilitado!")
     end)
 end
 
@@ -115,9 +109,6 @@ function game_example:draw()
     love.graphics.print("  P/Start: Pausar", 10, 230)
     love.graphics.print("  Esc/Back: Menu", 10, 250)
     love.graphics.print("", 10, 270)
-    love.graphics.print("Konami Code: ↑↑↓↓←→←→BA", 10, 290)
-    love.graphics.print("", 10, 310)
-    love.graphics.print("SISTEMA CENTRALIZADO:", 10, 330)
     love.graphics.print("• Tiro, Repeller, Movimento, Pausa, Menu", 10, 350)
     love.graphics.print("• Lógica movida para player.lua", 10, 370)
     love.graphics.print("• game.lua apenas delega para input.lua", 10, 390)

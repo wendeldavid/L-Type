@@ -1,4 +1,4 @@
-ZIP_NAME=L-Type.love
+ZIP_NAME=game.love
 FOLDERS=libs assets animations
 LUA_FILES=$(wildcard *.lua)
 
@@ -15,7 +15,8 @@ deploy: package
 
 	@sudo mount /dev/sda3 /mnt/love
 
-	@cp L-Type.love /mnt/love/love2d
+	@cp game.love /mnt/love/love2d
+	@mv /mnt/love/love2d/game.love /mnt/love/love2d/L-Type.love
 
 	@sudo umount /mnt/love
 

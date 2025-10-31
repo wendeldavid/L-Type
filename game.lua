@@ -59,7 +59,7 @@ function game:enter()
     -- Carregar fonte do FPS uma vez
 
     self.current_stage:enter(self.world)
-    
+
     -- Configurar callbacks de input
     self:setup_input_callbacks()
 end
@@ -171,9 +171,8 @@ function game:setup_input_callbacks()
 end
 
 function game:update(dt)
-    -- Atualizar sistema de input (Konami code timeout)
     input:update(dt)
-    
+
     self.world:update(dt) -- Atualizar o mundo de física
     self.player:update(dt)
     self.current_stage:update(dt, self.player, self.world)

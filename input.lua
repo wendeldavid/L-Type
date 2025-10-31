@@ -32,13 +32,6 @@ local input = {
         repeller_right = nil
     },
 
-    -- Konami code
-    konami_sequence = {'up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a'},
-    konami_progress = 0,
-    konami_timeout = 0,
-    konami_timeout_duration = 3,
-    konami_callback = nil,
-
     -- Controle do direcional analógico
     analog_last_state = {x = 0, y = 0},
     analog_cooldown = 0,
@@ -113,10 +106,10 @@ local gamepad_mappings = {
     fire_end = {'x', 'y'},
 
     -- Controles de jogo - repeller (botões do gamepad)
-    repeller_up = {'y'},
-    repeller_down = {'a'},
-    repeller_left = {'x'},
-    repeller_right = {'b'}
+    -- repeller_up = {'y'},
+    -- repeller_down = {'a'},
+    -- repeller_left = {'x'},
+    -- repeller_right = {'b'}
 }
 
 -- Mapeamento de botões de joystick para ações
@@ -313,40 +306,7 @@ function input:get_all_actions()
     return actions
 end
 
--- Função para configurar callback do Konami code
-function input:set_konami_callback(callback_func)
-    self.konami_callback = callback_func
-end
-
--- Função para verificar Konami code
-function input:check_konami_code(input_value)
-    if self.konami_sequence[self.konami_progress + 1] == input_value then
-        self.konami_progress = self.konami_progress + 1
-        self.konami_timeout = 0
-
-        if self.konami_progress == #self.konami_sequence then
-            if self.konami_callback and type(self.konami_callback) == 'function' then
-                self.konami_callback()
-            end
-            self.konami_progress = 0
-        end
-    else
-        self.konami_progress = 0
-        self.konami_timeout = 0
-    end
-end
-
--- Função para atualizar timeout do Konami code
 function input:update(dt)
-    -- Atualizar Konami code timeout
-    if self.konami_progress > 0 then
-        self.konami_timeout = self.konami_timeout + dt
-        if self.konami_timeout >= self.konami_timeout_duration then
-            self.konami_progress = 0
-            self.konami_timeout = 0
-        end
-    end
-
     -- Atualizar cooldown do direcional analógico
     if self.analog_cooldown > 0 then
         self.analog_cooldown = self.analog_cooldown - dt
@@ -358,9 +318,6 @@ end
 
 -- Handlers de input
 function input:keypressed(key)
-    -- Verificar Konami code primeiro
-    self:check_konami_code(key)
-
     -- Verificar ações normais
     for action, _ in pairs(self.callbacks) do
         if self:is_action_pressed(key, action) then
@@ -371,9 +328,6 @@ function input:keypressed(key)
 end
 
 function input:joystickpressed(joystick, button)
-    -- Verificar Konami code primeiro
-    self:check_konami_code(button)
-
     -- Verificar ações normais
     for action, _ in pairs(self.callbacks) do
         if self:is_action_pressed(button, action) then
@@ -384,9 +338,6 @@ function input:joystickpressed(joystick, button)
 end
 
 function input:gamepadpressed(gamepad, button)
-    -- Verificar Konami code primeiro
-    self:check_konami_code(button)
-
     -- Verificar ações normais
     for action, _ in pairs(self.callbacks) do
         if self:is_action_pressed(button, action) then

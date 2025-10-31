@@ -31,7 +31,6 @@ function menu:leave()
 end
 
 function menu:update(dt)
-    -- Atualizar sistema de input (Konami code timeout)
     input:update(dt)
 end
 
@@ -64,11 +63,6 @@ end
 
 -- Configurar callbacks de input
 function menu:setup_input_callbacks()
-    -- Callback do Konami code
-    input:set_konami_callback(function()
-        print("Konami code detected")
-    end)
-
     -- Callbacks de navegação (agnósticos ao dispositivo)
     -- Funciona com: ↑/W (teclado), dpup (gamepad), qualquer botão (joystick)
     input:set_callback('navigate_up', function()

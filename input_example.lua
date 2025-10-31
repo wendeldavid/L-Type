@@ -16,7 +16,6 @@ function example_state:leave()
 end
 
 function example_state:update(dt)
-    -- Atualizar sistema de input (necessário para Konami code timeout)
     input:update(dt)
 end
 
@@ -64,12 +63,6 @@ function example_state:setup_input_callbacks()
         print("Saindo do jogo")
         love.event.quit()
     end)
-
-    -- Konami code (opcional)
-    input:set_konami_callback(function()
-        print("Konami code ativado!")
-        -- Sua funcionalidade secreta aqui
-    end)
 end
 
 -- Delegar todos os inputs para o sistema centralizado
@@ -93,7 +86,6 @@ function example_state:draw()
     love.graphics.print("Exemplo de uso do sistema de input centralizado", 10, 10)
     love.graphics.print("Use as setas/WASD para navegar", 10, 40)
     love.graphics.print("Use Enter/Esc para confirmar/cancelar", 10, 70)
-    love.graphics.print("Tente o Konami code: ↑↑↓↓←→←→BA", 10, 100)
 end
 
 return example_state

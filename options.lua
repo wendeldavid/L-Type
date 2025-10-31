@@ -31,7 +31,7 @@ local getControls = function()
         }
     end
 
-    if BUILD_TYPE == 'pc' then
+    if BUILD_TYPE == 'linux' or BUILD_TYPE == 'macos' or BUILD_TYPE == 'windows' then
         return {
             {key = "Setas/WASD", action = "Mover a nave"},
             {key = "B/Y", action = "Atirar"},
