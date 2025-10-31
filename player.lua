@@ -1,5 +1,6 @@
 local animation = require('animations/player_ship')
 local options = require 'options'
+local input = require 'input'
 
 local Player = {
     movingUp = false,
@@ -38,6 +39,11 @@ function Player:new(world, x, y)
     obj.charging = false
     obj.charge_timer = 0
     obj.charge_ready = false
+
+    -- Configurar callbacks de input
+    obj:setup_input_callbacks()
+    obj:setup_movement_release_callbacks()
+
     return obj
 end
 
@@ -288,52 +294,84 @@ function Player:fireUp()
     self.charge_timer = 0
     self.charge_ready = false
 end
-function Player:keypressed(key)
-    if key == 'b' or key == 'y' then
+
+-- Configurar callbacks de input centralizado
+function Player:setup_input_callbacks()
+    -- Callbacks de tiro (usar sistema centralizado)
+    input:set_callback('fire_start', function()
         self:fireDown()
-    end
-end
+    end)
 
-function Player:keyreleased(key)
-    if (key == 'b' or key == 'y') then
+    input:set_callback('fire_end', function()
         self:fireUp()
-    end
-end
+    end)
 
-function Player:gamepadpressed(joystick, button)
-    if button == 'dpup' then
+    -- Callbacks de controle do repeller (direcional)
+    input:set_callback('repeller_up', function()
+        self.repeller_orbital_angle = -math.pi/2
+        self.repeller_visible = true
+        self.repeller_timer = 2
+    end)
+
+    input:set_callback('repeller_down', function()
+        self.repeller_orbital_angle = math.pi/2
+        self.repeller_visible = true
+        self.repeller_timer = 2
+    end)
+
+    input:set_callback('repeller_left', function()
+        self.repeller_orbital_angle = math.pi
+        self.repeller_visible = true
+        self.repeller_timer = 2
+    end)
+
+    input:set_callback('repeller_right', function()
+        self.repeller_orbital_angle = 0
+        self.repeller_visible = true
+        self.repeller_timer = 2
+    end)
+
+    -- Callbacks de movimento (usar sistema centralizado)
+    input:set_callback('move_up', function()
         self.movingUp = true
-    elseif button == 'dpdown' then
+    end)
+
+    input:set_callback('move_down', function()
         self.movingDown = true
-    elseif button == 'dpleft' then
+    end)
+
+    input:set_callback('move_left', function()
         self.movingLeft = true
-    elseif button == 'dpright'then
+    end)
+
+    input:set_callback('move_right', function()
         self.movingRight = true
-    elseif button == 'x' then
-        self:fireDown()
-    end
+    end)
 end
 
-function Player:gamepadreleased(joystick, button)
-    if button == 'dpup' then
+-- Função para configurar callbacks de movimento quando teclas são soltas
+function Player:setup_movement_release_callbacks()
+    -- Callbacks para parar movimento quando teclas são soltas
+    input:set_callback('move_up_release', function()
         self.movingUp = false
-    elseif button == 'dpdown' then
+    end)
+
+    input:set_callback('move_down_release', function()
         self.movingDown = false
-    elseif button == 'dpleft' then
+    end)
+
+    input:set_callback('move_left_release', function()
         self.movingLeft = false
-    elseif button == 'dpright'then
+    end)
+
+    input:set_callback('move_right_release', function()
         self.movingRight = false
-    elseif button == 'x' then
-        self:fireUp()
-    end
+    end)
 end
 
-function Player:joystickpressed(joystick, button)
-    -- Implementação vazia
-end
-
-function Player:joystickreleased(joystick, button)
-    -- Implementação vazia
+-- Função para limpar callbacks quando o player for destruído
+function Player:clear_input_callbacks()
+    input:clear_callbacks()
 end
 
 return Player

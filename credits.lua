@@ -40,7 +40,12 @@ function credits:draw()
     end
     if can_return then
         love.graphics.setColor(1,1,0.5)
-        local key_name = (BUILD_TYPE == 'portable') and 'SELECT' or 'ESC'
+        local key_name = 'ESC'
+        if BUILD_TYPE == 'portable' then
+            key_name = 'SELECT'
+        elseif BUILD_TYPE == 'nx' then
+            key_name = '-'
+        end
         love.graphics.printf("Pressione " .. key_name .. " para voltar ao menu", 0, 440, 640, 'center')
     end
 end

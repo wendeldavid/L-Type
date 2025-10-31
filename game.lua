@@ -5,6 +5,7 @@ local paused = require 'paused'
 local game_over = require 'game_over'
 local finished = require 'finished'
 local options = require 'options'
+local input = require 'input'
 
 local stage_01 = require 'stage-01'
 
@@ -58,6 +59,9 @@ function game:enter()
     -- Carregar fonte do FPS uma vez
 
     self.current_stage:enter(self.world)
+
+    -- Configurar callbacks de input
+    self:setup_input_callbacks()
 end
 
 game.beginContact = function(a, b, coll)
@@ -154,7 +158,21 @@ game.beginContact = function(a, b, coll)
     -- print(aClass, bClass)
 end
 
+-- Configurar callbacks de input para o jogo
+function game:setup_input_callbacks()
+    -- Callbacks de controle do jogo (pausa e menu)
+    input:set_callback('pause', function()
+        Gamestate.push(paused)
+    end)
+
+    input:set_callback('cancel', function()
+        Gamestate.switch(require('menu'))
+    end)
+end
+
 function game:update(dt)
+    input:update(dt)
+
     self.world:update(dt) -- Atualizar o mundo de física
     self.player:update(dt)
     self.current_stage:update(dt, self.player, self.world)
@@ -204,39 +222,37 @@ function game:update(dt)
 end
 
 function game:keypressed(key)
-    if key == 'escape' then
-        Gamestate.switch(require('menu'))
-    elseif key == 'p' then
-        Gamestate.push(paused)
-    else
-        self.player:keypressed(key)
-    end
+    -- Usar sistema centralizado para todas as ações
+    input:keypressed(key)
 end
 
 function game:keyreleased(key)
-    self.player:keyreleased(key)
+    -- Usar sistema centralizado para todas as ações
+    input:keyreleased(key)
 end
 
 function game:joystickpressed(joystick, button)
-    self.player:joystickpressed(joystick, button)
+    -- Usar sistema centralizado para todas as ações
+    input:joystickpressed(joystick, button)
 end
 
 function game:joystickreleased(joystick, button)
-    self.player:joystickreleased(joystick, button)
+    -- Usar sistema centralizado para todas as ações
+    input:joystickreleased(joystick, button)
 end
 
 function game:gamepadpressed(gamepad, button)
-    if button == 'back' then
-        Gamestate.switch(require('menu'))
-    elseif button == 'start' then
-        Gamestate.push(paused)
-    else
-        self.player:gamepadpressed(gamepad, button)
-    end
+    -- Usar sistema centralizado para todas as ações
+    input:gamepadpressed(gamepad, button)
 end
 
 function game:gamepadreleased(gamepad, button)
-    self.player:gamepadreleased(gamepad, button)
+    -- Usar sistema centralizado para todas as ações
+    input:gamepadreleased(gamepad, button)
+end
+
+function game:mousepressed(x, y, button)
+    input:mousepressed(x, y, button)
 end
 
 
@@ -281,6 +297,8 @@ function game:leave()
     if music and music:isPlaying() then
         music:stop()
     end
+    -- Limpar callbacks de input
+    input:clear_callbacks()
     -- Limpar referências para liberar memória
     self.world = nil
     self.player = nil
