@@ -74,4 +74,13 @@ function love.gamepadpressed(gamepad, button)
     input:gamepadpressed(gamepad, button)
 end
 
+function love.gamepadaxis(joystick, axis, value)
+    addInput('gamepad axis '..axis..' '..value)
+	-- if axis == "leftx" then
+	-- 	position.x = width/2 + value*width/2
+	-- elseif axis == "lefty" then
+	-- 	position.y = height/2 + value*height/2
+	-- end
+end
+
 BUILD_TYPE = build_type

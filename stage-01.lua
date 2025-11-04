@@ -15,11 +15,19 @@ local stage = {
     enemies = {},
     enemy_projectiles = {},
     spawn_timer = 0,
-    spawn_interval = 6
+    spawn_interval = 6,
+    map_width_pixels = 0,
+    screen_width = 0,
+    stage_finished = false
 }
 
 function stage:enter(world)
 	self.map = sti("assets/stages/stg-01.lua")
+
+    -- Calcular largura do mapa em pixels
+    self.map_width_pixels = self.map.width * self.map.tilewidth
+    self.screen_width = love.graphics.getWidth()
+    self.stage_finished = false
 
     -- Carregar imagem do planeta
     self.planet_img = love.graphics.newImage('assets/sprites/planet_1.png')
@@ -38,7 +46,7 @@ function stage:enter(world)
     self.enemies = {}
     self.enemy_projectiles = {}
     self.spawn_timer = 0
-    self.spawn_interval = 6
+    self.spawn_interval = 20
 
     stage.terraincolliders = {}
     for _, obj in ipairs(self.map.layers["terrain_layer"].objects) do
@@ -67,11 +75,25 @@ end
 function stage:update(dt, player, world)
 	if self.map then self.map:update(dt) end
 
-	-- Move o mapa da direita para a esquerda
-	self.map_offset = self.map_offset - (dt * 10) -- velocidade 10px/s
+	-- Verificar se o estágio chegou ao fim
+	-- O estágio termina quando todo o mapa já passou pela tela
+	-- map_offset negativo = mapa rolando para a esquerda
+	-- Quando -map_offset >= (largura_do_mapa - largura_da_tela), o estágio terminou
+	local max_offset = -(self.map_width_pixels - self.screen_width)
+	if not self.stage_finished and self.map_offset <= max_offset then
+		self.stage_finished = true
+		self.map_offset = max_offset -- Garantir que não passe do limite
+	end
+
+	-- Move o mapa da direita para a esquerda apenas se o estágio não terminou
+	if not self.stage_finished then
+		self.map_offset = self.map_offset - (dt * 10) -- velocidade 10px/s
+	end
 
     -- Atualizar posição do planeta (mais devagar)
-    self.planet_x = self.planet_x - dt * 2 -- velocidade de 2px/s para a esquerda
+    if not self.stage_finished then
+        self.planet_x = self.planet_x - dt * 2 -- velocidade de 2px/s para a esquerda
+    end
 
     -- Atualizar partículas
     self.particle_timer = self.particle_timer + dt
@@ -94,9 +116,12 @@ function stage:update(dt, player, world)
         end
     end
 
-    for _, collider in ipairs(stage.colliders) do
-        local x, y = collider:getPosition()
-        collider:setPosition(x - (dt * 10), y)
+    -- Mover colliders apenas se o estágio não terminou
+    if not self.stage_finished then
+        for _, collider in ipairs(stage.colliders) do
+            local x, y = collider:getPosition()
+            collider:setPosition(x - (dt * 10), y)
+        end
     end
 
     -- Atualizar inimigos
@@ -141,12 +166,14 @@ function stage:update(dt, player, world)
             end
         end
 
-        -- Spawn de enemies
-        self.spawn_timer = self.spawn_timer + dt
-        if self.spawn_timer >= self.spawn_interval then
-            self.spawn_timer = 0
-            local iy = math.random(15, 480-15)
-            table.insert(self.enemies, Enemy:new(world, 640-40, iy))
+        -- Spawn de enemies apenas se o estágio não terminou
+        if not self.stage_finished then
+            self.spawn_timer = self.spawn_timer + dt
+            if self.spawn_timer >= self.spawn_interval then
+                self.spawn_timer = 0
+                local iy = math.random(15, 480-15)
+                table.insert(self.enemies, Enemy:new(world, 640-40, iy))
+            end
         end
     end
 end

@@ -16,7 +16,8 @@ local music
 local music_files = {
     'assets/st/Metal Storm.mp3',
     'assets/st/Infernal Machinery.mp3',
-    'assets/st/Infernal Machinery (1).mp3'
+    'assets/st/Infernal Machinery (1).mp3',
+    'assets/st/Sepultura - Dead Embryonic Cells (Instrumental).mp3'
 }
 
 game.score = 0
