@@ -4,5 +4,6 @@
     ],
     "Lua.workspace.library": [
         "/usr/bin/love"
-    ]
+    ],
+    "makefile.configureOnOpen": false
 }
