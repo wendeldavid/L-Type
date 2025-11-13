@@ -32,8 +32,8 @@ function stage:enter(world)
     -- Inicializar variáveis de inimigos
     self.enemies = {}
     self.enemy_projectiles = {}
-    self.spawn_timer = 0
-    self.spawn_interval = 20
+    self.max_enemies = 5
+    self.spawn_points = {} -- Pontos de spawn definidos no mapa
 
     stage.terraincolliders = {}
     for _, obj in ipairs(self.map.layers["terrain_layer"].objects) do
@@ -55,6 +55,10 @@ function stage:enter(world)
                 collider:setCollisionClass(obj.type)
                 table.insert(stage.colliders, collider)
             end
+        end
+        if obj.type == "enemy_spawn" then
+            -- Coletar pontos de spawn do mapa com flag para rastrear se já foi usado
+            table.insert(self.spawn_points, {x = obj.x, y = obj.y, spawned = false})
         end
     end
 end
@@ -153,13 +157,34 @@ function stage:update(dt, player, world)
             end
         end
 
-        -- Spawn de enemies apenas se o estágio não terminou
-        if not self.stage_finished then
-            self.spawn_timer = self.spawn_timer + dt
-            if self.spawn_timer >= self.spawn_interval then
-                self.spawn_timer = 0
-                local iy = math.random(15, 480-15)
-                table.insert(self.enemies, Enemy:new(world, 640-40, iy))
+        -- Spawn de enemies quando pontos de inimigos aparecem na tela
+        if not self.stage_finished and #self.enemies < self.max_enemies then
+            -- Verificar cada ponto de spawn para ver se entrou na área visível
+            for _, spawn_point in ipairs(self.spawn_points) do
+                if not spawn_point.spawned then
+                    -- Calcular posição do ponto na tela considerando o scroll do mapa
+                    -- map_offset negativo = mapa rolando para a esquerda
+                    -- Quando map_offset = -100, o que estava em x=100 no mapa agora está em x=0 na tela
+                    -- Então: posição_na_tela = posição_no_mapa + map_offset
+                    local screen_x = spawn_point.x + self.map_offset
+
+                    -- Verificar se o ponto está prestes a entrar na tela ou já está visível
+                    -- Spawnar quando o ponto está próximo do lado direito da tela
+                    -- Como o mapa rola da direita para a esquerda, queremos spawnar quando o ponto
+                    -- está prestes a aparecer pela direita (screen_x próximo de screen_width)
+                    local spawn_trigger_x = self.screen_width + 50 -- Spawnar quando ponto está 50px à direita da tela
+                    if screen_x <= spawn_trigger_x and screen_x >= self.screen_width - 200 then
+                        -- Marcar ponto como usado e spawnar inimigo
+                        spawn_point.spawned = true
+                        -- Spawnar na posição Y do ponto, do lado direito da tela
+                        local spawn_x = self.screen_width - 40 -- Lado direito da tela (com margem)
+                        local spawn_y = spawn_point.y
+                        table.insert(self.enemies, Enemy:new(world, spawn_x, spawn_y))
+
+                        -- Parar após spawnar um inimigo por frame para evitar múltiplos spawns
+                        break
+                    end
+                end
             end
         end
     end
