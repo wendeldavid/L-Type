@@ -3,26 +3,13 @@ local sti = require("libs.Simple-Tiled-Implementation.sti.init")
 
 local Enemy = require 'enemy'
 
-local stage = {
-    map_offset = 0,
-    colliders = {},
-    planet_img = nil,
-    planet_x = nil,
-    planet_y = nil,
-    particles = {},
-    particle_timer = 0,
-    particle_interval = 0.2,
-    enemies = {},
-    enemy_projectiles = {},
-    spawn_timer = 0,
-    spawn_interval = 6,
-    map_width_pixels = 0,
-    screen_width = 0,
-    stage_finished = false
-}
+local stage = {}
 
 function stage:enter(world)
 	self.map = sti("assets/stages/stg-01.lua")
+    self.colliders = {}
+
+    self.map_offset = 0
 
     -- Calcular largura do mapa em pixels
     self.map_width_pixels = self.map.width * self.map.tilewidth
@@ -108,11 +95,11 @@ function stage:update(dt, player, world)
         table.insert(self.particles, particle)
     end
 
-    for i = #self.particles, 1, -1 do
-        local p = self.particles[i]
+    for particle_idx = #self.particles, 1, -1 do
+        local p = self.particles[particle_idx]
         p.x = p.x - p.speed * dt
         if p.x + p.size < 0 then
-            table.remove(self.particles, i)
+            table.remove(self.particles, particle_idx)
         end
     end
 
@@ -126,11 +113,11 @@ function stage:update(dt, player, world)
 
     -- Atualizar inimigos
     if player then
-        local i = 1
-        while i <= #self.enemies do
-            local enemy = self.enemies[i]
+        local enemy_idx = 1
+        while enemy_idx <= #self.enemies do
+            local enemy = self.enemies[enemy_idx]
             if enemy.collider and enemy.collider:isDestroyed() then
-                table.remove(self.enemies, i)
+                table.remove(self.enemies, enemy_idx)
             else
                 enemy.shoot_timer = (enemy.shoot_timer or 0) + dt
                 -- Apenas mover o inimigo, não atualizar projéteis aqui
@@ -140,29 +127,29 @@ function stage:update(dt, player, world)
                     local projectile = enemy:shootAtPlayer(player)
                     table.insert(self.enemy_projectiles, projectile)
                 end
-                i = i + 1
+                enemy_idx = enemy_idx + 1
             end
         end
 
         -- Atualizar todos os projéteis inimigos independentemente do inimigo estar vivo
-        for i = #self.enemy_projectiles, 1, -1 do
-            local proj = self.enemy_projectiles[i]
+        for projectile_idx = #self.enemy_projectiles, 1, -1 do
+            local proj = self.enemy_projectiles[projectile_idx]
             if proj.collider and not proj.collider:isDestroyed() then
                 -- Verificar se o projétil foi marcado para destruição
                 local ud = proj.collider:getUserData()
                 if ud and ud._to_destroy then
                     proj.collider:destroy()
-                    table.remove(self.enemy_projectiles, i)
+                    table.remove(self.enemy_projectiles, projectile_idx)
                 else
                     proj:update(dt)
                     -- projectile out of screen
                     if proj.collider:getX() < 0 or proj.collider:getX() > 640 or proj.collider:getY() < 0 or proj.collider:getY() > 480 then
                         proj.collider:destroy()
-                        table.remove(self.enemy_projectiles, i)
+                        table.remove(self.enemy_projectiles, projectile_idx)
                     end
                 end
             else
-                table.remove(self.enemy_projectiles, i)
+                table.remove(self.enemy_projectiles, projectile_idx)
             end
         end
 

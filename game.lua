@@ -112,6 +112,22 @@ game.beginContact = function(a, b, coll)
         return
     end
 
+    -- Detectar colisão entre projétil inimigo e terreno
+    if (aClass == 'EnemyProjectile' and bClass == 'Terrain') or
+        (aClass == 'Terrain' and bClass == 'EnemyProjectile') then
+        -- Marcar projétil inimigo para destruição ao colidir com terreno
+        if aClass == 'EnemyProjectile' and a and type(a.getUserData) == 'function' then
+            local ud = a:getUserData() or {}
+            ud._to_destroy = true
+            a:setUserData(ud)
+        elseif bClass == 'EnemyProjectile' and b and type(b.getUserData) == 'function' then
+            local ud = b:getUserData() or {}
+            ud._to_destroy = true
+            b:setUserData(ud)
+        end
+        return
+    end
+
     -- Detectar colisão entre projétil inimigo e repeller
     if (aClass == 'EnemyProjectile' and bClass == 'Repeller') or (aClass == 'Repeller' and bClass == 'EnemyProjectile') then
         -- Encontrar o player associado ao repeller

@@ -2,7 +2,7 @@ local Gamestate = require 'libs.hump.gamestate'
 local input = require 'input'
 
 local options = {
-    master_volume = 0.5,
+    master_volume = 0.2,
     music_volume = 0.1,
     sfx_volume = 0.1
 }
