@@ -294,7 +294,9 @@ function game:draw()
 
     self:drawFPS()
 
-    self.world:draw()
+    if DEBUG_MODE then
+        self.world:draw()
+    end
 end
 
 function game:drawFPS()

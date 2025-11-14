@@ -102,8 +102,8 @@ local gamepad_mappings = {
     move_right_release = {'dpright'},
 
     -- Controles de jogo - tiro
-    fire_start = {'x', 'y'},
-    fire_end = {'x', 'y'},
+    fire_start = {'x'},
+    fire_end = {'x'},
 
     -- Controles de jogo - repeller (botões do gamepad)
     -- repeller_up = {'y'},
@@ -217,33 +217,33 @@ end
 
 -- Função para verificar se uma tecla/botão corresponde a uma ação
 function input:is_action_pressed(input_value, action)
-    -- Verificar teclas
-    if key_mappings[action] then
-        for _, key in ipairs(key_mappings[action]) do
-            if input_value == key then
-                return true
+    if BUILD_TYPE == 'nx' then
+        if gamepad_mappings[action] then
+            for _, button in ipairs(gamepad_mappings[action]) do
+                if input_value == button then
+                    return true
+                end
             end
         end
     end
 
-    -- Verificar gamepad
-    if gamepad_mappings[action] then
-        for _, button in ipairs(gamepad_mappings[action]) do
-            if input_value == button then
-                return true
+    if BUILD_TYPE == 'linux' then
+        if key_mappings[action] then
+            for _, key in ipairs(key_mappings[action]) do
+                if input_value == key then
+                    return true
+                end
+            end
+        end
+
+        if joystick_mappings[action] then
+            for _, button in ipairs(joystick_mappings[action]) do
+                if input_value == button then
+                    return true
+                end
             end
         end
     end
-
-    -- Verificar joystick
-    if joystick_mappings[action] then
-        for _, button in ipairs(joystick_mappings[action]) do
-            if input_value == button then
-                return true
-            end
-        end
-    end
-
     return false
 end
 
