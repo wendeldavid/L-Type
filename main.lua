@@ -84,3 +84,5 @@ function love.gamepadaxis(joystick, axis, value)
 end
 
 BUILD_TYPE = build_type
+
+DEBUG_MODE = false
