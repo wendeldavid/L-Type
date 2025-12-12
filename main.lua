@@ -21,6 +21,12 @@ Gamestate.registerState('credits', credits)
 Gamestate.registerState('game', game)
 Gamestate.registerState('menu', menu)
 
+local gp = {
+    button = nil,
+    pressed = false,
+    vibrating = false
+}
+
 function love.load()
     love.window.setMode(width, height)
     Gamestate.registerEvents()
@@ -30,6 +36,22 @@ end
 function love.draw()
     Gamestate.draw()
     drawInputHistory()
+    local joystick_print_index = 100
+    if love.joystick.getJoystickCount() > 0 then
+        for i = 1, love.joystick.getJoystickCount() do
+            local gamepad = love.joystick.getJoysticks()[i]
+            love.graphics.print(gamepad:getName() .. " - " .. "Vibration: " .. tostring(gamepad:isVibrationSupported()), 10, joystick_print_index)
+            joystick_print_index = joystick_print_index + 20
+        end
+        love.graphics.print("pressed: " .. (gp.button or "none"), 10, 60)
+        if gp.pressed then
+            love.graphics.print("vibration ON: " .. tostring(gp.vibrating), 10, 80)
+        else
+            love.graphics.print("vibration OFF: " .. tostring(gp.vibrating), 10, 80)
+        end
+    else
+        love.graphics.print("No joysticks found", 10, 50)
+    end
 end
 
 --
@@ -60,6 +82,8 @@ function drawInputHistory()
 end
 
 function love.keypressed(key)
+    -- TODO: rever como fazer uso do teclado
+    if BUILD_TYPE ~= "keyboard" then return end
     addInput(key)
     input:keypressed(key)
 end
@@ -67,11 +91,41 @@ end
 function love.joystickpressed(joystick, button)
     addInput('joystick '..button)
     input:joystickpressed(joystick, button)
+
+    gp.button = button
+    gp.pressed = true
+    gp.vibrating = joystick:setVibration(1, 1)
+end
+
+function love.joystickreleased(joystick, button)
+    addInput('joystick released '..button)
+    input:joystickreleased(joystick, button)
+
+    gp.button = button
+    gp.pressed = false
+    gp.vibrating = joystick:setVibration(0, 0)
 end
 
 function love.gamepadpressed(gamepad, button)
     addInput('gamepad '..button)
     input:gamepadpressed(gamepad, button)
+
+    gp.button = button
+    if button == 'x' and gamepad:isVibrationSupported() then
+        gp.pressed = true
+        gamepad:setVibration(1, 1)
+    end
+end
+
+function love.gamepadreleased(gamepad, button)
+    addInput('gamepad released '..button)
+    input:gamepadreleased(gamepad, button)
+
+    gp.button = nil
+    if button == 'x' and gamepad:isVibrationSupported() then
+        gp.pressed = false
+        gamepad:setVibration(0, 0)
+    end
 end
 
 function love.gamepadaxis(joystick, axis, value)

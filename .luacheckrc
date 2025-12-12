@@ -2,5 +2,6 @@
 max_line_length = false
 globals = {
   "love",
-  "BUILD_TYPE"
+  "BUILD_TYPE",
+  "DEBUG_MODE"
 }

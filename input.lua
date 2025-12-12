@@ -215,6 +215,14 @@ function input:check_analog_stick()
     self.analog_last_state.y = left_y
 end
 
+function input:check_trigger_stick()
+    local gamepad = love.joystick.getJoysticks()[1] -- Primeiro gamepad conectado
+    if not gamepad then return end
+
+    local trigger_x = gamepad:getAxis(3) -- Eixo X do trigger esquerdo
+    local trigger_y = gamepad:getAxis(4) -- Eixo Y do trigger esquerdo
+    -- TODO: Implementar trigger stick para tiro
+end
 -- Função para verificar se uma tecla/botão corresponde a uma ação
 function input:is_action_pressed(input_value, action)
     if BUILD_TYPE == 'nx' then
@@ -314,10 +322,13 @@ function input:update(dt)
 
     -- Verificar movimento do direcional analógico esquerdo
     self:check_analog_stick()
+    self:check_trigger_stick()
 end
 
 -- Handlers de input
 function input:keypressed(key)
+    if BUILD_TYPE ~= "keyboard" then return end
+
     -- Verificar ações normais
     for action, _ in pairs(self.callbacks) do
         if self:is_action_pressed(key, action) then
@@ -349,6 +360,7 @@ end
 
 -- Handlers para eventos de soltar tecla/botão
 function input:keyreleased(key)
+    if BUILD_TYPE ~= "keyboard" then return end
     -- Ações que precisam de keyreleased (fire_end e movimento release)
     local release_actions = {'fire_end', 'move_up_release', 'move_down_release', 'move_left_release', 'move_right_release'}
 
