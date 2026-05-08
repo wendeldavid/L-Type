@@ -14,9 +14,8 @@ Contexto do repo L-Type. Usar como base para próximos prompts.
 - Estados (como `menu.lua`) e Entidades (como `player.lua`) registram e limpam seus callbacks.
 
 ## 2. Normalização de Inputs (Linux vs Consoles)
-- Atual: checa `BUILD_TYPE` duro. Frágil para portáteis (R36S, Anbernic).
-- Meta/Regra: Transição para usar 100% a API de Gamepad do LÖVE (`gamepadpressed`, `love.joystick.setGamepadMapping`) no lugar do `joystickpressed` cru. 
-- Mapeamento resolve diferenças de OS. Se controle não for lido como gamepad no Linux, usar `gamecontrollerdb.txt` da SDL.
+- Meta/Regra: Transição para priorizar a API de Joystick puro do LÖVE (`joystickpressed`, `joystickreleased`) em vez de Gamepad. Consoles portáteis Linux (ex: R36S, Anbernic) nem sempre detectam nativamente como gamepad.
+- O sistema de input deve usar mapeamentos numéricos cruzados para suportar qualquer joystick plugado ou embutido de forma agnóstica sem depender de `BUILD_TYPE`.
 
 ## 3. Pasta `libs/`
 - Código de terceiros (apis, frameworks).

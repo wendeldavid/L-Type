@@ -83,7 +83,6 @@ end
 
 function love.keypressed(key)
     -- TODO: rever como fazer uso do teclado
-    if BUILD_TYPE ~= "keyboard" then return end
     addInput(key)
     input:keypressed(key)
 end

@@ -239,8 +239,6 @@ function game:update(dt)
 end
 
 function game:keypressed(key)
-    -- TODO: rever como fazer uso do teclado
-    if BUILD_TYPE ~= "keyboard" then return end
     -- Usar sistema centralizado para todas as ações
     input:keypressed(key)
 end

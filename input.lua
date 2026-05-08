@@ -224,8 +224,8 @@ function input:check_trigger_stick()
     -- TODO: Implementar trigger stick para tiro
 end
 -- Função para verificar se uma tecla/botão corresponde a uma ação
-function input:is_action_pressed(input_value, action)
-    if BUILD_TYPE == 'nx' then
+function input:is_action_pressed(input_type, input_value, action)
+    if input_type == 'gamepad' then
         if gamepad_mappings[action] then
             for _, button in ipairs(gamepad_mappings[action]) do
                 if input_value == button then
@@ -233,9 +233,7 @@ function input:is_action_pressed(input_value, action)
                 end
             end
         end
-    end
-
-    if BUILD_TYPE == 'linux' then
+    elseif input_type == 'key' then
         if key_mappings[action] then
             for _, key in ipairs(key_mappings[action]) do
                 if input_value == key then
@@ -243,7 +241,7 @@ function input:is_action_pressed(input_value, action)
                 end
             end
         end
-
+    elseif input_type == 'joystick' then
         if joystick_mappings[action] then
             for _, button in ipairs(joystick_mappings[action]) do
                 if input_value == button then
@@ -327,11 +325,9 @@ end
 
 -- Handlers de input
 function input:keypressed(key)
-    if BUILD_TYPE ~= "keyboard" then return end
-
     -- Verificar ações normais
     for action, _ in pairs(self.callbacks) do
-        if self:is_action_pressed(key, action) then
+        if self:is_action_pressed('key', key, action) then
             self:execute_callback(action)
             break -- Evitar múltiplas execuções
         end
@@ -341,7 +337,7 @@ end
 function input:joystickpressed(joystick, button)
     -- Verificar ações normais
     for action, _ in pairs(self.callbacks) do
-        if self:is_action_pressed(button, action) then
+        if self:is_action_pressed('joystick', tostring(button), action) then
             self:execute_callback(action)
             break
         end
@@ -351,7 +347,7 @@ end
 function input:gamepadpressed(gamepad, button)
     -- Verificar ações normais
     for action, _ in pairs(self.callbacks) do
-        if self:is_action_pressed(button, action) then
+        if self:is_action_pressed('gamepad', button, action) then
             self:execute_callback(action)
             break
         end
@@ -360,12 +356,11 @@ end
 
 -- Handlers para eventos de soltar tecla/botão
 function input:keyreleased(key)
-    if BUILD_TYPE ~= "keyboard" then return end
     -- Ações que precisam de keyreleased (fire_end e movimento release)
     local release_actions = {'fire_end', 'move_up_release', 'move_down_release', 'move_left_release', 'move_right_release'}
 
     for _, action in ipairs(release_actions) do
-        if self.callbacks[action] and self:is_action_pressed(key, action) then
+        if self.callbacks[action] and self:is_action_pressed('key', key, action) then
             self:execute_callback(action)
             break
         end
@@ -377,7 +372,7 @@ function input:gamepadreleased(gamepad, button)
     local release_actions = {'fire_end', 'move_up_release', 'move_down_release', 'move_left_release', 'move_right_release'}
 
     for _, action in ipairs(release_actions) do
-        if self.callbacks[action] and self:is_action_pressed(button, action) then
+        if self.callbacks[action] and self:is_action_pressed('gamepad', button, action) then
             self:execute_callback(action)
             break
         end
@@ -389,7 +384,7 @@ function input:joystickreleased(joystick, button)
     local release_actions = {'fire_end', 'move_up_release', 'move_down_release', 'move_left_release', 'move_right_release'}
 
     for _, action in ipairs(release_actions) do
-        if self.callbacks[action] and self:is_action_pressed(button, action) then
+        if self.callbacks[action] and self:is_action_pressed('joystick', tostring(button), action) then
             self:execute_callback(action)
             break
         end
