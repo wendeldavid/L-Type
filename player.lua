@@ -163,7 +163,10 @@ function Player:updateCharging(dt)
     if self.charging then
         self.charge_timer = self.charge_timer + dt
         if self.charge_timer >= 3 then
-            self.charge_ready = true
+            self:shoot(true)
+            self.charging = false
+            self.charge_timer = 0
+            self.charge_ready = false
         end
     end
 end
@@ -285,9 +288,7 @@ function Player:fireDown()
 end
 
 function Player:fireUp()
-    if self.charge_ready then
-        self:shoot(true)
-    else
+    if self.charging then
         self:shoot(false)
     end
     self.charging = false
