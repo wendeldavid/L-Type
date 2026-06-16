@@ -64,20 +64,20 @@ end
 -- Configurar callbacks de input
 function menu:setup_input_callbacks()
     -- Callbacks de navegação (agnósticos ao dispositivo)
-    -- Funciona com: ↑/W (teclado), dpup (gamepad), qualquer botão (joystick)
+    -- Funciona com: ↑/W (teclado), qualquer botão (joystick)
     input:set_callback('navigate_up', function()
         self.selected = self.selected - 1
         if self.selected < 1 then self.selected = 3 end
     end)
 
-    -- Funciona com: ↓/S (teclado), dpdown (gamepad), qualquer botão (joystick)
+    -- Funciona com: ↓/S (teclado), qualquer botão (joystick)
     input:set_callback('navigate_down', function()
         self.selected = self.selected + 1
         if self.selected > 3 then self.selected = 1 end
     end)
 
     -- Callback de confirmação (agnóstico ao dispositivo)
-    -- Funciona com: Enter/Space (teclado), A/Start (gamepad), botões 1/2 (joystick)
+    -- Funciona com: Enter/Space (teclado), botões 1/2 (joystick)
     input:set_callback('confirm', function()
         if self.selected == 1 then
             Gamestate.switch(require('game'))
@@ -89,7 +89,7 @@ function menu:setup_input_callbacks()
     end)
 
     -- Callback de cancelamento (agnóstico ao dispositivo)
-    -- Funciona com: Esc (teclado), Back/Select (gamepad), botões 3/4 (joystick)
+    -- Funciona com: Esc (teclado), botões 3/4 (joystick)
     input:set_callback('cancel', function()
         love.event.quit()
     end)

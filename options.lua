@@ -122,9 +122,7 @@ function options:joystickpressed(joystick, button)
     input:joystickpressed(joystick, button)
 end
 
-function options:gamepadpressed(gamepad, button)
-    input:gamepadpressed(gamepad, button)
-end
+
 
 
 return options

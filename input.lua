@@ -75,68 +75,32 @@ local key_mappings = {
     repeller_right = {'6'}
 }
 
--- Mapeamento de botões de gamepad para ações
-local gamepad_mappings = {
-    -- Navegação de menu
-    navigate_up = {'dpup'},
-    navigate_down = {'dpdown'},
-    navigate_left = {'dpleft'},
-    navigate_right = {'dpright'},
-
-    -- Ações de menu
-    confirm = {'a', 'start'},
-    cancel = {'back', 'select'},
-    pause = {'start'},
-    quit = {'back'},
-
-    -- Controles de jogo - movimento
-    move_up = {'dpup'},
-    move_down = {'dpdown'},
-    move_left = {'dpleft'},
-    move_right = {'dpright'},
-
-    -- Controles de jogo - movimento release
-    move_up_release = {'dpup'},
-    move_down_release = {'dpdown'},
-    move_left_release = {'dpleft'},
-    move_right_release = {'dpright'},
-
-    -- Controles de jogo - tiro
-    fire_start = {'x'},
-    fire_end = {'x'},
-
-    -- Controles de jogo - repeller (botões do gamepad)
-    -- repeller_up = {'y'},
-    -- repeller_down = {'a'},
-    -- repeller_left = {'x'},
-    -- repeller_right = {'b'}
-}
 
 -- Mapeamento de botões de joystick para ações
 local joystick_mappings = {
     -- Navegação de menu (botões numéricos comuns)
-    navigate_up = {},
-    navigate_down = {},
-    navigate_left = {},
-    navigate_right = {},
+    navigate_up = {'9'},
+    navigate_down = {'10'},
+    navigate_left = {'11'},
+    navigate_right = {'12'},
 
     -- Ações de menu
     confirm = {'1', '2'},
-    cancel = {'3', '4'},
-    pause = {'5', '6', '8', '10'},
-    quit = {'7', '9'},
+    cancel = {'3', '4', '13'},
+    pause = {'5', '6', '8', '14'},
+    quit = {'7'},
 
     -- Controles de jogo - movimento
-    move_up = {},
-    move_down = {},
-    move_left = {},
-    move_right = {},
+    move_up = {'9'},
+    move_down = {'10'},
+    move_left = {'11'},
+    move_right = {'12'},
 
     -- Controles de jogo - movimento release
-    move_up_release = {},
-    move_down_release = {},
-    move_left_release = {},
-    move_right_release = {},
+    move_up_release = {'9'},
+    move_down_release = {'10'},
+    move_left_release = {'11'},
+    move_right_release = {'12'},
 
     -- Controles de jogo - tiro
     fire_start = {'1', '2', '3', '4'},
@@ -151,11 +115,11 @@ local joystick_mappings = {
 
 -- Função para verificar movimento do direcional analógico esquerdo
 function input:check_analog_stick()
-    local gamepad = love.joystick.getJoysticks()[1] -- Primeiro gamepad conectado
-    if not gamepad then return end
+    local joystick = love.joystick.getJoysticks()[1] -- Primeiro joystick conectado
+    if not joystick then return end
 
-    local left_x = gamepad:getAxis(1) -- Eixo X do direcional esquerdo
-    local left_y = gamepad:getAxis(2) -- Eixo Y do direcional esquerdo
+    local left_x = joystick:getAxis(1) -- Eixo X do direcional esquerdo
+    local left_y = joystick:getAxis(2) -- Eixo Y do direcional esquerdo
 
     -- Aplicar deadzone para evitar movimento involuntário
     local deadzone = 0.3
@@ -213,27 +177,39 @@ function input:check_analog_stick()
     -- Atualizar estado anterior
     self.analog_last_state.x = left_x
     self.analog_last_state.y = left_y
+
+    -- Verificar D-Pad (Hat)
+    if joystick:getHatCount() > 0 then
+        local hat = joystick:getHat(1)
+        if hat ~= 'c' and self.analog_cooldown <= 0 then
+            if hat == 'u' or hat == 'lu' or hat == 'ru' then
+                if self.callbacks.navigate_up then self:execute_callback('navigate_up') end
+            elseif hat == 'd' or hat == 'ld' or hat == 'rd' then
+                if self.callbacks.navigate_down then self:execute_callback('navigate_down') end
+            end
+            
+            if hat == 'l' or hat == 'lu' or hat == 'ld' then
+                if self.callbacks.navigate_left then self:execute_callback('navigate_left') end
+            elseif hat == 'r' or hat == 'ru' or hat == 'rd' then
+                if self.callbacks.navigate_right then self:execute_callback('navigate_right') end
+            end
+            
+            self.analog_cooldown = self.analog_cooldown_duration
+        end
+    end
 end
 
 function input:check_trigger_stick()
-    local gamepad = love.joystick.getJoysticks()[1] -- Primeiro gamepad conectado
-    if not gamepad then return end
+    local joystick = love.joystick.getJoysticks()[1] -- Primeiro joystick conectado
+    if not joystick then return end
 
-    local trigger_x = gamepad:getAxis(3) -- Eixo X do trigger esquerdo
-    local trigger_y = gamepad:getAxis(4) -- Eixo Y do trigger esquerdo
+    local trigger_x = joystick:getAxis(3) -- Eixo X do trigger esquerdo
+    local trigger_y = joystick:getAxis(4) -- Eixo Y do trigger esquerdo
     -- TODO: Implementar trigger stick para tiro
 end
 -- Função para verificar se uma tecla/botão corresponde a uma ação
 function input:is_action_pressed(input_type, input_value, action)
-    if input_type == 'gamepad' then
-        if gamepad_mappings[action] then
-            for _, button in ipairs(gamepad_mappings[action]) do
-                if input_value == button then
-                    return true
-                end
-            end
-        end
-    elseif input_type == 'key' then
+    if input_type == 'key' then
         if key_mappings[action] then
             for _, key in ipairs(key_mappings[action]) do
                 if input_value == key then
@@ -280,11 +256,6 @@ function input:add_custom_mapping(input_value, action)
     end
     table.insert(key_mappings[action], input_value)
 
-    -- Adicionar ao mapeamento de gamepad
-    if not gamepad_mappings[action] then
-        gamepad_mappings[action] = {}
-    end
-    table.insert(gamepad_mappings[action], input_value)
 
     -- Adicionar ao mapeamento de joystick
     if not joystick_mappings[action] then
@@ -297,7 +268,6 @@ end
 function input:get_action_mappings(action)
     local mappings = {
         keys = key_mappings[action] or {},
-        gamepad = gamepad_mappings[action] or {},
         joystick = joystick_mappings[action] or {}
     }
     return mappings
@@ -334,29 +304,9 @@ function input:joystickpressed(joystick, button)
     end
 end
 
-function input:gamepadpressed(gamepad, button)
-    -- Verificar ações normais
-    for action, _ in pairs(self.callbacks) do
-        if self:is_action_pressed('gamepad', button, action) then
-            self:execute_callback(action)
-            break
-        end
-    end
-end
 
 -- Handlers para eventos de soltar tecla/botão
 
-function input:gamepadreleased(gamepad, button)
-    -- Ações que precisam de gamepadreleased (fire_end e movimento release)
-    local release_actions = {'fire_end', 'move_up_release', 'move_down_release', 'move_left_release', 'move_right_release'}
-
-    for _, action in ipairs(release_actions) do
-        if self.callbacks[action] and self:is_action_pressed('gamepad', button, action) then
-            self:execute_callback(action)
-            break
-        end
-    end
-end
 
 function input:joystickreleased(joystick, button)
     -- Ações que precisam de joystickreleased (fire_end e movimento release)

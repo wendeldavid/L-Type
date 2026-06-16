@@ -106,17 +106,17 @@ end
 function Player:update(dt)
     local vx, vy = 0, 0
 
-    -- Controle digital (teclado + direcional digital do gamepad)
+    -- Controle digital (teclado + direcional digital do joystick)
     if self:isMovingUp() then vy = -self.speed end
     if self:isMovingDown() then vy = self.speed end
     if self:isMovingLeft() then vx = -self.speed end
     if self:isMovingRight() then vx = self.speed end
 
-    -- Controle analógico (direcional analógico esquerdo do gamepad)
-    local gamepad = love.joystick.getJoysticks()[1] -- Primeiro gamepad conectado
-    if gamepad then
-        local left_x = gamepad:getAxis(1) -- Eixo X do direcional esquerdo
-        local left_y = gamepad:getAxis(2) -- Eixo Y do direcional esquerdo
+    -- Controle analógico (direcional analógico esquerdo do joystick)
+    local joystick = love.joystick.getJoysticks()[1] -- Primeiro joystick conectado
+    if joystick then
+        local left_x = joystick:getAxis(1) -- Eixo X do direcional esquerdo
+        local left_y = joystick:getAxis(2) -- Eixo Y do direcional esquerdo
 
         -- Aplicar deadzone para evitar movimento involuntário
         local deadzone = 0.2
@@ -125,6 +125,22 @@ function Player:update(dt)
         end
         if math.abs(left_y) > deadzone then
             vy = left_y * self.speed
+        end
+
+        -- Controle digital D-Pad (Hat)
+        if joystick:getHatCount() > 0 then
+            local hat = joystick:getHat(1)
+            if hat == 'l' or hat == 'lu' or hat == 'ld' then
+                vx = -self.speed
+            elseif hat == 'r' or hat == 'ru' or hat == 'rd' then
+                vx = self.speed
+            end
+            
+            if hat == 'u' or hat == 'lu' or hat == 'ru' then
+                vy = -self.speed
+            elseif hat == 'd' or hat == 'ld' or hat == 'rd' then
+                vy = self.speed
+            end
         end
     end
 
@@ -175,10 +191,10 @@ function Player:updateRepeller(dt, px, py)
     local new_angle = self.repeller_orbital_angle -- Manter a posição atual por padrão
 
     -- Tentar usar o direcional analógico direito primeiro
-    local gamepad = love.joystick.getJoysticks()[1]
-    if gamepad then
-        local right_x = gamepad:getAxis(3) -- Eixo X do direcional direito
-        local right_y = gamepad:getAxis(4) -- Eixo Y do direcional direito
+    local joystick = love.joystick.getJoysticks()[1]
+    if joystick then
+        local right_x = joystick:getAxis(3) -- Eixo X do direcional direito
+        local right_y = joystick:getAxis(4) -- Eixo Y do direcional direito
 
         -- Aplicar deadzone para evitar movimento involuntário
         local deadzone = 0.2

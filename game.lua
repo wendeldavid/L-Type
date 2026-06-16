@@ -187,6 +187,15 @@ function game:setup_input_callbacks()
     end)
 end
 
+-- Chamado quando o Gamestate.pop() é acionado no estado de pause e volta para cá
+function game:resume()
+    self:setup_input_callbacks()
+    if self.player then
+        self.player:setup_input_callbacks()
+        self.player:setup_movement_release_callbacks()
+    end
+end
+
 function game:update(dt)
     input:update(dt)
 
@@ -249,15 +258,7 @@ function game:joystickreleased(joystick, button)
     input:joystickreleased(joystick, button)
 end
 
-function game:gamepadpressed(gamepad, button)
-    -- Usar sistema centralizado para todas as ações
-    input:gamepadpressed(gamepad, button)
-end
 
-function game:gamepadreleased(gamepad, button)
-    -- Usar sistema centralizado para todas as ações
-    input:gamepadreleased(gamepad, button)
-end
 
 
 function game:draw()

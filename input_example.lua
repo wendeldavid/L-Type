@@ -72,9 +72,7 @@ function example_state:joystickpressed(joystick, button)
     input:joystickpressed(joystick, button)
 end
 
-function example_state:gamepadpressed(gamepad, button)
-    input:gamepadpressed(gamepad, button)
-end
+
 
 
 

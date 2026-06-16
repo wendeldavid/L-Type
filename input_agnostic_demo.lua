@@ -22,7 +22,7 @@ function demo_state:setup_input_callbacks()
     
     -- navigate_up pode ser ativado por:
     -- - Tecla 'up' ou 'w'
-    -- - Gamepad 'dpup'
+
     -- - Joystick qualquer botão (mapeado)
     input:set_callback('navigate_up', function()
         print("↑ Navegando para cima (agnóstico ao input)")
@@ -30,7 +30,7 @@ function demo_state:setup_input_callbacks()
     
     -- navigate_down pode ser ativado por:
     -- - Tecla 'down' ou 's'
-    -- - Gamepad 'dpdown'
+
     -- - Joystick qualquer botão (mapeado)
     input:set_callback('navigate_down', function()
         print("↓ Navegando para baixo (agnóstico ao input)")
@@ -38,7 +38,7 @@ function demo_state:setup_input_callbacks()
     
     -- confirm pode ser ativado por:
     -- - Tecla 'return', 'kpenter' ou 'space'
-    -- - Gamepad 'a' ou 'start'
+
     -- - Joystick botões '1' ou '2'
     input:set_callback('confirm', function()
         print("✓ Confirmando ação (agnóstico ao input)")
@@ -46,7 +46,7 @@ function demo_state:setup_input_callbacks()
     
     -- cancel pode ser ativado por:
     -- - Tecla 'escape'
-    -- - Gamepad 'back' ou 'select'
+
     -- - Joystick botões '3' ou '4'
     input:set_callback('cancel', function()
         print("✗ Cancelando ação (agnóstico ao input)")
@@ -67,9 +67,7 @@ function demo_state:joystickpressed(joystick, button)
     input:joystickpressed(joystick, button)
 end
 
-function demo_state:gamepadpressed(gamepad, button)
-    input:gamepadpressed(gamepad, button)
-end
+
 
 
 

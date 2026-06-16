@@ -11,12 +11,12 @@ function game_example:enter()
     print("Controles configurados!")
     print("")
     print("Controles disponíveis:")
-    print("- Tiro: B/Y (teclado), X/Y (gamepad) - SISTEMA CENTRALIZADO")
-    print("- Repeller: 8/2/4/6 (teclado), Y/A/X/B (gamepad) - SISTEMA CENTRALIZADO")
-    print("- Movimento: WASD/Setas (teclado), D-pad (gamepad) - SISTEMA CENTRALIZADO")
-    print("- Pausa: P (teclado), Start (gamepad) - SISTEMA CENTRALIZADO")
-    print("- Menu: Esc (teclado), Back (gamepad) - SISTEMA CENTRALIZADO")
-    print("- Navegação Menu: ↑↓/WS (teclado), D-pad/Analógico (gamepad) - SISTEMA CENTRALIZADO")
+    print("- Tiro: B/Y (teclado) - SISTEMA CENTRALIZADO")
+    print("- Repeller: 8/2/4/6 (teclado) - SISTEMA CENTRALIZADO")
+    print("- Movimento: WASD/Setas (teclado) - SISTEMA CENTRALIZADO")
+    print("- Pausa: P (teclado) - SISTEMA CENTRALIZADO")
+    print("- Menu: Esc (teclado) - SISTEMA CENTRALIZADO")
+    print("- Navegação Menu: ↑↓/WS (teclado), Analógico (joystick) - SISTEMA CENTRALIZADO")
 end
 
 function game_example:leave()
@@ -74,13 +74,7 @@ function game_example:joystickreleased(joystick, button)
     input:joystickreleased(joystick, button)
 end
 
-function game_example:gamepadpressed(gamepad, button)
-    input:gamepadpressed(gamepad, button)
-end
 
-function game_example:gamepadreleased(gamepad, button)
-    input:gamepadreleased(gamepad, button)
-end
 
 
 
@@ -94,7 +88,7 @@ function game_example:draw()
     love.graphics.print("", 10, 110)
     love.graphics.print("Controles do Repeller:", 10, 130)
     love.graphics.print("  8/2/4/6: Direcionar", 10, 150)
-    love.graphics.print("  Y/A/X/B: Direcionar (gamepad)", 10, 170)
+
     love.graphics.print("", 10, 190)
     love.graphics.print("Controles do Jogo:", 10, 210)
     love.graphics.print("  P/Start: Pausar", 10, 230)
