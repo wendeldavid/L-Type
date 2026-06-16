@@ -115,38 +115,38 @@ local gamepad_mappings = {
 -- Mapeamento de botões de joystick para ações
 local joystick_mappings = {
     -- Navegação de menu (botões numéricos comuns)
-    navigate_up = {'1', '2', '3', '4', '5', '6', '7', '8'},
-    navigate_down = {'1', '2', '3', '4', '5', '6', '7', '8'},
-    navigate_left = {'1', '2', '3', '4', '5', '6', '7', '8'},
-    navigate_right = {'1', '2', '3', '4', '5', '6', '7', '8'},
+    navigate_up = {},
+    navigate_down = {},
+    navigate_left = {},
+    navigate_right = {},
 
     -- Ações de menu
     confirm = {'1', '2'},
     cancel = {'3', '4'},
-    pause = {'5', '6'},
-    quit = {'7', '8'},
+    pause = {'5', '6', '8', '10'},
+    quit = {'7', '9'},
 
     -- Controles de jogo - movimento
-    move_up = {'1', '2', '3', '4', '5', '6', '7', '8'},
-    move_down = {'1', '2', '3', '4', '5', '6', '7', '8'},
-    move_left = {'1', '2', '3', '4', '5', '6', '7', '8'},
-    move_right = {'1', '2', '3', '4', '5', '6', '7', '8'},
+    move_up = {},
+    move_down = {},
+    move_left = {},
+    move_right = {},
 
     -- Controles de jogo - movimento release
-    move_up_release = {'1', '2', '3', '4', '5', '6', '7', '8'},
-    move_down_release = {'1', '2', '3', '4', '5', '6', '7', '8'},
-    move_left_release = {'1', '2', '3', '4', '5', '6', '7', '8'},
-    move_right_release = {'1', '2', '3', '4', '5', '6', '7', '8'},
+    move_up_release = {},
+    move_down_release = {},
+    move_left_release = {},
+    move_right_release = {},
 
     -- Controles de jogo - tiro
-    fire_start = {'1', '2'},
-    fire_end = {'1', '2'},
+    fire_start = {'1', '2', '3', '4'},
+    fire_end = {'1', '2', '3', '4'},
 
     -- Controles de jogo - repeller
-    repeller_up = {'1', '2'},
-    repeller_down = {'3', '4'},
-    repeller_left = {'5', '6'},
-    repeller_right = {'7', '8'}
+    repeller_up = {},
+    repeller_down = {},
+    repeller_left = {},
+    repeller_right = {}
 }
 
 -- Função para verificar movimento do direcional analógico esquerdo
