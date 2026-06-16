@@ -81,11 +81,11 @@ function drawInputHistory()
     end
 end
 
-function love.keypressed(key)
-    -- TODO: rever como fazer uso do teclado
-    addInput(key)
-    input:keypressed(key)
-end
+-- function love.keypressed(key)
+--     -- TODO: rever como fazer uso do teclado
+--     addInput(key)
+--     input:keypressed(key)
+-- end
 
 function love.joystickpressed(joystick, button)
     addInput('joystick '..button)

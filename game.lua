@@ -238,15 +238,15 @@ function game:update(dt)
 
 end
 
-function game:keypressed(key)
-    -- Usar sistema centralizado para todas as ações
-    input:keypressed(key)
-end
+-- function game:keypressed(key)
+--     -- Usar sistema centralizado para todas as ações
+--     input:keypressed(key)
+-- end
 
-function game:keyreleased(key)
-    -- Usar sistema centralizado para todas as ações
-    input:keyreleased(key)
-end
+-- function game:keyreleased(key)
+--     -- Usar sistema centralizado para todas as ações
+--     input:keyreleased(key)
+-- end
 
 function game:joystickpressed(joystick, button)
     -- Usar sistema centralizado para todas as ações

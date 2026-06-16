@@ -34,7 +34,7 @@ function credits:draw()
     love.graphics.setFont(font)
     love.graphics.setColor(1,1,1)
     if not flip_state then
-        love.graphics.printf("Criado por: Wendel David Przygoda", 0, 480/2-20, 640, 'center')
+        love.graphics.printf("Criado por: Wendel David Przygoda,\npapai do Igor Przygoda", 0, 480/2-20, 640, 'center')
     else
         love.graphics.printf("Obrigado por jogar!", 0, 480/2-20, 640, 'center')
     end

@@ -324,15 +324,15 @@ function input:update(dt)
 end
 
 -- Handlers de input
-function input:keypressed(key)
-    -- Verificar ações normais
-    for action, _ in pairs(self.callbacks) do
-        if self:is_action_pressed('key', key, action) then
-            self:execute_callback(action)
-            break -- Evitar múltiplas execuções
-        end
-    end
-end
+-- function input:keypressed(key)
+--     -- Verificar ações normais
+--     for action, _ in pairs(self.callbacks) do
+--         if self:is_action_pressed('key', key, action) then
+--             self:execute_callback(action)
+--             break -- Evitar múltiplas execuções
+--         end
+--     end
+-- end
 
 function input:joystickpressed(joystick, button)
     -- Verificar ações normais
@@ -355,17 +355,17 @@ function input:gamepadpressed(gamepad, button)
 end
 
 -- Handlers para eventos de soltar tecla/botão
-function input:keyreleased(key)
-    -- Ações que precisam de keyreleased (fire_end e movimento release)
-    local release_actions = {'fire_end', 'move_up_release', 'move_down_release', 'move_left_release', 'move_right_release'}
+-- function input:keyreleased(key)
+--     -- Ações que precisam de keyreleased (fire_end e movimento release)
+--     local release_actions = {'fire_end', 'move_up_release', 'move_down_release', 'move_left_release', 'move_right_release'}
 
-    for _, action in ipairs(release_actions) do
-        if self.callbacks[action] and self:is_action_pressed('key', key, action) then
-            self:execute_callback(action)
-            break
-        end
-    end
-end
+--     for _, action in ipairs(release_actions) do
+--         if self.callbacks[action] and self:is_action_pressed('key', key, action) then
+--             self:execute_callback(action)
+--             break
+--         end
+--     end
+-- end
 
 function input:gamepadreleased(gamepad, button)
     -- Ações que precisam de gamepadreleased (fire_end e movimento release)
