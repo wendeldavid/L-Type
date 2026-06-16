@@ -61,9 +61,7 @@ function demo_state:setup_input_callbacks()
 end
 
 -- Delegar todos os inputs para o sistema centralizado
-function demo_state:keypressed(key)
-    input:keypressed(key)
-end
+
 
 function demo_state:joystickpressed(joystick, button)
     input:joystickpressed(joystick, button)
@@ -73,9 +71,7 @@ function demo_state:gamepadpressed(gamepad, button)
     input:gamepadpressed(gamepad, button)
 end
 
-function demo_state:mousepressed(x, y, button)
-    input:mousepressed(x, y, button)
-end
+
 
 function demo_state:draw()
     love.graphics.setColor(1, 1, 1)

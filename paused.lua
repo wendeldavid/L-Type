@@ -10,11 +10,6 @@ function paused:draw()
     love.graphics.printf("Game Paused\nPress '" .. resume_key .. "' to Resume", 0, 480 / 2 - 20, 640, 'center')
 end
 
-function paused:keypressed(key)
-    if (BUILD_TYPE == 'linux' and  key == 'p') or (BUILD_TYPE == 'nx' and key == '+') then
-        Gamestate.pop()
-    end
-end
 
 function paused:leave()
     -- Limpar referências se necessário

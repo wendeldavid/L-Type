@@ -185,11 +185,6 @@ function Player:updateRepeller(dt, px, py)
         if math.abs(right_x) > deadzone or math.abs(right_y) > deadzone then
             new_angle = math.atan2(right_y, right_x)
         end
-        -- Se não há input do gamepad, manter a posição atual (não usar mouse)
-    else
-        -- Se não há gamepad, usar o mouse
-        local mx, my = love.mouse.getPosition()
-        new_angle = math.atan2(my - py, mx - px)
     end
 
     -- Detectar movimento do ângulo

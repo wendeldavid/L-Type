@@ -65,13 +65,6 @@ function game_example:setup_input_callbacks()
 end
 
 -- Delegar inputs para o sistema centralizado
-function game_example:keypressed(key)
-    input:keypressed(key)
-end
-
-function game_example:keyreleased(key)
-    input:keyreleased(key)
-end
 
 function game_example:joystickpressed(joystick, button)
     input:joystickpressed(joystick, button)
@@ -89,9 +82,7 @@ function game_example:gamepadreleased(gamepad, button)
     input:gamepadreleased(gamepad, button)
 end
 
-function game_example:mousepressed(x, y, button)
-    input:mousepressed(x, y, button)
-end
+
 
 function game_example:draw()
     love.graphics.setColor(1, 1, 1)

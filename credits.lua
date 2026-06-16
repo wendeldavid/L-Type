@@ -50,11 +50,6 @@ function credits:draw()
     end
 end
 
-function credits:keypressed(key)
-    if key == 'escape' and can_return then
-        Gamestate.switch(require('menu'))
-    end
-end
 
 function credits:joystickpressed(joystick, button)
 end
