@@ -21,6 +21,12 @@ Gamestate.registerState('credits', credits)
 Gamestate.registerState('game', game)
 Gamestate.registerState('menu', menu)
 
+local gp = {
+    button = nil,
+    pressed = false,
+    vibrating = false
+}
+
 function love.load()
     love.window.setMode(width, height)
     Gamestate.registerEvents()
@@ -30,6 +36,22 @@ end
 function love.draw()
     Gamestate.draw()
     drawInputHistory()
+    local joystick_print_index = 100
+    if love.joystick.getJoystickCount() > 0 then
+        for i = 1, love.joystick.getJoystickCount() do
+            local joystick = love.joystick.getJoysticks()[i]
+            love.graphics.print(joystick:getName() .. " - " .. "Vibration: " .. tostring(joystick:isVibrationSupported()), 10, joystick_print_index)
+            joystick_print_index = joystick_print_index + 20
+        end
+        love.graphics.print("pressed: " .. (gp.button or "none"), 10, 60)
+        if gp.pressed then
+            love.graphics.print("vibration ON: " .. tostring(gp.vibrating), 10, 80)
+        else
+            love.graphics.print("vibration OFF: " .. tostring(gp.vibrating), 10, 80)
+        end
+    else
+        love.graphics.print("No joysticks found", 10, 50)
+    end
 end
 
 --
@@ -59,28 +81,26 @@ function drawInputHistory()
     end
 end
 
-function love.keypressed(key)
-    addInput(key)
-    input:keypressed(key)
-end
-
 function love.joystickpressed(joystick, button)
     addInput('joystick '..button)
     input:joystickpressed(joystick, button)
+
+    gp.button = button
+    gp.pressed = true
+    gp.vibrating = joystick:setVibration(1, 1)
 end
 
-function love.gamepadpressed(gamepad, button)
-    addInput('gamepad '..button)
-    input:gamepadpressed(gamepad, button)
+function love.joystickreleased(joystick, button)
+    addInput('joystick released '..button)
+    input:joystickreleased(joystick, button)
+
+    gp.button = button
+    gp.pressed = false
+    gp.vibrating = joystick:setVibration(0, 0)
 end
 
-function love.gamepadaxis(joystick, axis, value)
-    addInput('gamepad axis '..axis..' '..value)
-	-- if axis == "leftx" then
-	-- 	position.x = width/2 + value*width/2
-	-- elseif axis == "lefty" then
-	-- 	position.y = height/2 + value*height/2
-	-- end
-end
+
 
 BUILD_TYPE = build_type
+
+DEBUG_MODE = false

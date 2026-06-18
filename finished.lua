@@ -10,11 +10,6 @@ function finished:draw()
     love.graphics.printf('Parabéns!!!', 0, love.graphics.getHeight()/2 - 20, love.graphics.getWidth(), 'center')
 end
 
-function finished:keypressed(key)
-    if key == 'return' then
-        Gamestate.switch(require('credits'), {from = 'finished'})
-    end
-end
 
 function finished:leave()
     -- Limpar referências se necessário

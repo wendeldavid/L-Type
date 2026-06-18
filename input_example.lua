@@ -66,21 +66,15 @@ function example_state:setup_input_callbacks()
 end
 
 -- Delegar todos os inputs para o sistema centralizado
-function example_state:keypressed(key)
-    input:keypressed(key)
-end
+
 
 function example_state:joystickpressed(joystick, button)
     input:joystickpressed(joystick, button)
 end
 
-function example_state:gamepadpressed(gamepad, button)
-    input:gamepadpressed(gamepad, button)
-end
 
-function example_state:mousepressed(x, y, button)
-    input:mousepressed(x, y, button)
-end
+
+
 
 function example_state:draw()
     love.graphics.print("Exemplo de uso do sistema de input centralizado", 10, 10)

@@ -13,11 +13,6 @@ function game_over:draw()
     love.graphics.printf("Fim de Jogo\nPressione '" .. key_name .. "' para voltar ao menu", 0, 480 / 2 - 20, 640, 'center')
 end
 
-function game_over:keypressed(key)
-    if key == 'return' then
-        Gamestate.switch(require('menu')) -- Voltar ao menu inicial
-    end
-end
 
 function game_over:leave()
     -- Limpar referências se necessário

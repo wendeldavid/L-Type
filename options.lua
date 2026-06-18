@@ -35,7 +35,6 @@ local getControls = function()
         return {
             {key = "Setas/WASD", action = "Mover a nave"},
             {key = "B/Y", action = "Atirar"},
-            {key = "Mouse", action = "Direção do escudo defletor"},
             {key = "ESC", action = "Menu/Pausa"},
             {key = "P", action = "Pausar o jogo"},
             {key = "Espaço/Enter", action = "Selecionar no menu"},
@@ -118,21 +117,12 @@ function options:setup_input_callbacks()
     end)
 end
 
--- Delegar input para o sistema centralizado
-function options:keypressed(key)
-    input:keypressed(key)
-end
 
 function options:joystickpressed(joystick, button)
     input:joystickpressed(joystick, button)
 end
 
-function options:gamepadpressed(gamepad, button)
-    input:gamepadpressed(gamepad, button)
-end
 
-function options:mousepressed(x, y, button)
-    input:mousepressed(x, y, button)
-end
+
 
 return options

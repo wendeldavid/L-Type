@@ -1,4 +1,5 @@
 local Gamestate = require 'libs.hump.gamestate'
+local input = require 'input'
 
 local credits = {}
 
@@ -16,9 +17,28 @@ function credits:enter(to, previous)
     flip_timer = 0
     flip_state = false
     can_return = not from_finished -- só bloqueia se veio de finished
+
+    input:clear_callbacks()
+    input:set_callback('cancel', function()
+        if can_return then
+            Gamestate.switch(require('menu'))
+        end
+    end)
+    -- Permitir sair também com o botão de confirmar/start
+    input:set_callback('confirm', function()
+        if can_return then
+            Gamestate.switch(require('menu'))
+        end
+    end)
+    input:set_callback('pause', function()
+        if can_return then
+            Gamestate.switch(require('menu'))
+        end
+    end)
 end
 
 function credits:update(dt)
+    input:update(dt)
     flip_timer = flip_timer + dt
     if flip_timer >= 6 then
         flip_timer = flip_timer - 6
@@ -34,7 +54,7 @@ function credits:draw()
     love.graphics.setFont(font)
     love.graphics.setColor(1,1,1)
     if not flip_state then
-        love.graphics.printf("Criado por: Wendel David Przygoda", 0, 480/2-20, 640, 'center')
+        love.graphics.printf("Criado por: Wendel David Przygoda,\npapai do Igor Przygoda", 0, 480/2-20, 640, 'center')
     else
         love.graphics.printf("Obrigado por jogar!", 0, 480/2-20, 640, 'center')
     end
@@ -50,23 +70,9 @@ function credits:draw()
     end
 end
 
-function credits:keypressed(key)
-    if key == 'escape' and can_return then
-        Gamestate.switch(require('menu'))
-    end
-end
-
-function credits:joystickpressed(joystick, button)
-end
-
-function credits:gamepadpressed(gamepad, button)
-    if button == 'back' and can_return then
-        Gamestate.switch(require('menu'))
-    end
-end
 
 function credits:leave()
-    -- Limpar referências se necessário
+    input:clear_callbacks()
 end
 
 return credits
