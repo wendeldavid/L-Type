@@ -38,44 +38,6 @@ local input = {
     analog_cooldown_duration = 0.2 -- 200ms entre movimentos
 }
 
--- Mapeamento de teclas para ações
-local key_mappings = {
-    -- Navegação de menu
-    navigate_up = {'up', 'w'},
-    navigate_down = {'down', 's'},
-    navigate_left = {'left', 'a'},
-    navigate_right = {'right', 'd'},
-
-    -- Ações de menu
-    confirm = {'return', 'kpenter', 'space'},
-    cancel = {'escape'},
-    pause = {'p'},
-    quit = {'q'},
-
-    -- Controles de jogo - movimento
-    move_up = {'up', 'w'},
-    move_down = {'down', 's'},
-    move_left = {'left', 'a'},
-    move_right = {'right', 'd'},
-
-    -- Controles de jogo - movimento release
-    move_up_release = {'up', 'w'},
-    move_down_release = {'down', 's'},
-    move_left_release = {'left', 'a'},
-    move_right_release = {'right', 'd'},
-
-    -- Controles de jogo - tiro
-    fire_start = {'b', 'y'},
-    fire_end = {'b', 'y'},
-
-    -- Controles de jogo - repeller (teclas numéricas)
-    repeller_up = {'8'},
-    repeller_down = {'2'},
-    repeller_left = {'4'},
-    repeller_right = {'6'}
-}
-
-
 -- Mapeamento de botões de joystick para ações
 local joystick_mappings = {
     -- Navegação de menu (botões numéricos comuns)
@@ -103,8 +65,8 @@ local joystick_mappings = {
     move_right_release = {'12'},
 
     -- Controles de jogo - tiro
-    fire_start = {'1', '2', '3', '4'},
-    fire_end = {'1', '2', '3', '4'},
+    fire_start = {'1', '2', '3', '4', '6', '8'},
+    fire_end = {'1', '2', '3', '4', '6', '8'},
 
     -- Controles de jogo - repeller
     repeller_up = {},
@@ -187,13 +149,13 @@ function input:check_analog_stick()
             elseif hat == 'd' or hat == 'ld' or hat == 'rd' then
                 if self.callbacks.navigate_down then self:execute_callback('navigate_down') end
             end
-            
+
             if hat == 'l' or hat == 'lu' or hat == 'ld' then
                 if self.callbacks.navigate_left then self:execute_callback('navigate_left') end
             elseif hat == 'r' or hat == 'ru' or hat == 'rd' then
                 if self.callbacks.navigate_right then self:execute_callback('navigate_right') end
             end
-            
+
             self.analog_cooldown = self.analog_cooldown_duration
         end
     end
@@ -207,17 +169,9 @@ function input:check_trigger_stick()
     local trigger_y = joystick:getAxis(4) -- Eixo Y do trigger esquerdo
     -- TODO: Implementar trigger stick para tiro
 end
--- Função para verificar se uma tecla/botão corresponde a uma ação
+-- Função para verificar se um botão de joystick corresponde a uma ação
 function input:is_action_pressed(input_type, input_value, action)
-    if input_type == 'key' then
-        if key_mappings[action] then
-            for _, key in ipairs(key_mappings[action]) do
-                if input_value == key then
-                    return true
-                end
-            end
-        end
-    elseif input_type == 'joystick' then
+    if input_type == 'joystick' then
         if joystick_mappings[action] then
             for _, button in ipairs(joystick_mappings[action]) do
                 if input_value == button then
@@ -248,16 +202,8 @@ function input:clear_callbacks()
     end
 end
 
--- Função para adicionar mapeamento customizado
+-- Função para adicionar mapeamento customizado de joystick
 function input:add_custom_mapping(input_value, action)
-    -- Adicionar ao mapeamento de teclas
-    if not key_mappings[action] then
-        key_mappings[action] = {}
-    end
-    table.insert(key_mappings[action], input_value)
-
-
-    -- Adicionar ao mapeamento de joystick
     if not joystick_mappings[action] then
         joystick_mappings[action] = {}
     end
@@ -267,7 +213,6 @@ end
 -- Função para debug - mostrar todos os mapeamentos de uma ação
 function input:get_action_mappings(action)
     local mappings = {
-        keys = key_mappings[action] or {},
         joystick = joystick_mappings[action] or {}
     }
     return mappings

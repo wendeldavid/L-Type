@@ -137,7 +137,7 @@ function Player:update(dt)
             elseif hat == 'r' or hat == 'ru' or hat == 'rd' then
                 vx = self.speed
             end
-            
+
             if hat == 'u' or hat == 'lu' or hat == 'ru' then
                 vy = -self.speed
             elseif hat == 'd' or hat == 'ld' or hat == 'rd' then
