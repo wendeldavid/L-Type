@@ -4,7 +4,12 @@ local input = require 'input'
 local options = {
     master_volume = 0.2,
     music_volume = 0.1,
-    sfx_volume = 0.1
+    sfx_volume = 0.1,
+    selected = 1,
+    menu_items = {
+        {label = 'Master Volume', type = 'slider'},
+        {label = 'Voltar', type = 'action'}
+    }
 }
 
 local font = love.graphics.newFont('assets/fonts/starkwalker_classic/StarkwalkerClassic.otf', 32)
@@ -12,6 +17,10 @@ local font = love.graphics.newFont('assets/fonts/starkwalker_classic/Starkwalker
 function options:enter()
     -- Configurar callbacks de input
     self:setup_input_callbacks()
+end
+
+function options:update(dt)
+    input:update(dt)
 end
 
 function options:leave()
@@ -74,7 +83,17 @@ function options:draw()
         love.graphics.printf(c.action, x2, y, 460, 'left')
     end
 
-    options:drawVolumeSlider()
+    local menu_y = 320
+    for i, item in ipairs(self.menu_items) do
+        if self.selected == i then
+            love.graphics.setColor(1, 0.8, 0.2)
+        else
+            love.graphics.setColor(1,1,1)
+        end
+        love.graphics.printf(item.label, 0, menu_y + (i-1) * 40, 640, 'center')
+    end
+
+    self:drawVolumeSlider()
 end
 
 function options:drawVolumeSlider()
@@ -92,10 +111,16 @@ function options:drawVolumeSlider()
     local handle_x = slider_x + value * slider_w
     love.graphics.setColor(1 ,0.8, 0.1)
     love.graphics.circle('fill', handle_x, slider_y + slider_h/2, handle_radius)
+
+    if self.selected == 1 then
+        love.graphics.setColor(1, 0.8, 0.2, 0.6)
+        love.graphics.circle('line', handle_x, slider_y + slider_h/2, handle_radius + 4)
+    end
+
     -- Texto do valor
     love.graphics.setColor(1,1,1)
     love.graphics.setFont(font)
-    love.graphics.printf(string.format("Volume", math.floor(value*100)), 0, slider_y - 36, 640, 'center')
+    love.graphics.printf(string.format("Volume: %d%%", math.floor(value*100)), 0, slider_y - 36, 640, 'center')
 end
 
 -- Configurar callbacks de input
@@ -105,15 +130,40 @@ function options:setup_input_callbacks()
         Gamestate.switch(require('menu'))
     end)
 
-    -- Callbacks de navegação (ajustar volume)
+    -- Callbacks de navegação para seleção de item
+    input:set_callback('navigate_up', function()
+        self.selected = self.selected - 1
+        if self.selected < 1 then
+            self.selected = #self.menu_items
+        end
+    end)
+
+    input:set_callback('navigate_down', function()
+        self.selected = self.selected + 1
+        if self.selected > #self.menu_items then
+            self.selected = 1
+        end
+    end)
+
+    -- Ajustar volume apenas quando slider estiver selecionado
     input:set_callback('navigate_left', function()
-        options.master_volume = math.max(0, (options.master_volume or 0) - 0.05)
-        love.audio.setVolume(options.master_volume)
+        if self.selected == 1 then
+            self.master_volume = math.max(0, (self.master_volume or 0) - 0.05)
+            love.audio.setVolume(self.master_volume)
+        end
     end)
 
     input:set_callback('navigate_right', function()
-        options.master_volume = math.min(1, (options.master_volume or 0) + 0.05)
-        love.audio.setVolume(options.master_volume)
+        if self.selected == 1 then
+            self.master_volume = math.min(1, (self.master_volume or 0) + 0.05)
+            love.audio.setVolume(self.master_volume)
+        end
+    end)
+
+    input:set_callback('confirm', function()
+        if self.selected == 2 then
+            Gamestate.switch(require('menu'))
+        end
     end)
 end
 

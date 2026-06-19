@@ -39,6 +39,8 @@ function Player:new(world, x, y)
     obj.charging = false
     obj.charge_timer = 0
     obj.charge_ready = false
+    obj.charge_vibration_timer = 0
+    obj.charge_vibration_delay = 0.5
 
     -- Configurar callbacks de input
     obj:setup_input_callbacks()
@@ -178,11 +180,24 @@ function Player:updateCharging(dt)
     -- Controle de carregamento do tiro
     if self.charging then
         self.charge_timer = self.charge_timer + dt
+        self.charge_vibration_delay = self.charge_vibration_delay - dt
+
+        if self.charge_timer >= 0.5 then
+            self.charge_vibration_timer = self.charge_vibration_timer - dt
+            if self.charge_vibration_timer <= 0 then
+                input:vibrate(0.15, 0.5, 0.5)
+                self.charge_vibration_timer = 0.15
+            end
+        end
+
         if self.charge_timer >= 3 then
             self:shoot(true)
+            input:stop_vibration()
             self.charging = false
             self.charge_timer = 0
             self.charge_ready = false
+            self.charge_vibration_timer = 0
+            self.charge_vibration_delay = 0.5
         end
     end
 end
@@ -302,9 +317,11 @@ function Player:fireUp()
     if self.charging then
         self:shoot(false)
     end
+    input:stop_vibration()
     self.charging = false
     self.charge_timer = 0
     self.charge_ready = false
+    self.charge_vibration_timer = 0
 end
 
 -- Configurar callbacks de input centralizado

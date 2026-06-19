@@ -290,6 +290,14 @@ function input:vibrate(duration, left, right)
     end
 end
 
+-- Função para parar a vibração do controle
+function input:stop_vibration()
+    local joystick = love.joystick.getJoysticks()[1]
+    if joystick and joystick:isVibrationSupported() then
+        joystick:setVibration(0, 0, 0)
+    end
+end
+
 function input:update(dt)
     -- Atualizar cooldown do direcional analógico
     if self.analog_cooldown > 0 then
