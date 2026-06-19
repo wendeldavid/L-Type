@@ -24,6 +24,12 @@ function paused:enter()
     input:set_callback('confirm', function()
         Gamestate.pop()
     end)
+
+    -- Callback para voltar ao menu principal
+    input:set_callback('cancel', function()
+        Gamestate.pop()
+        Gamestate.switch(require('menu'))
+    end)
 end
 
 function paused:leave()

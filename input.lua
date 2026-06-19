@@ -79,26 +79,26 @@ local key_mappings = {
 -- Mapeamento de botões de joystick para ações
 local joystick_mappings = {
     -- Navegação de menu (botões numéricos comuns)
-    navigate_up = {'9'},
-    navigate_down = {'10'},
+    navigate_up = {},
+    navigate_down = {},
     navigate_left = {'11'},
     navigate_right = {'12'},
 
     -- Ações de menu
-    confirm = {'1', '2'},
-    cancel = {'3', '4', '13'},
-    pause = {'5', '6', '8', '14'},
+    confirm = {'1', '2', '10'},
+    cancel = {'3', '4', '13', '9'},
+    pause = {'5', '6', '8', '14', '10'},
     quit = {'7'},
 
     -- Controles de jogo - movimento
-    move_up = {'9'},
-    move_down = {'10'},
+    move_up = {},
+    move_down = {},
     move_left = {'11'},
     move_right = {'12'},
 
     -- Controles de jogo - movimento release
-    move_up_release = {'9'},
-    move_down_release = {'10'},
+    move_up_release = {},
+    move_down_release = {},
     move_left_release = {'11'},
     move_right_release = {'12'},
 
@@ -280,6 +280,14 @@ function input:get_all_actions()
         actions[action] = self:get_action_mappings(action)
     end
     return actions
+end
+
+-- Função para fazer o controle vibrar
+function input:vibrate(duration, left, right)
+    local joystick = love.joystick.getJoysticks()[1]
+    if joystick and joystick:isVibrationSupported() then
+        joystick:setVibration(left or 1, right or 1, duration or 0.1)
+    end
 end
 
 function input:update(dt)

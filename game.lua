@@ -98,6 +98,7 @@ game.beginContact = function(a, b, coll)
             game.flash_count = 0
             game.flash_on = false
         end
+        input:vibrate(0.5)
         return
     end
 

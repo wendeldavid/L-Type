@@ -44,11 +44,6 @@ function love.draw()
             joystick_print_index = joystick_print_index + 20
         end
         love.graphics.print("pressed: " .. (gp.button or "none"), 10, 60)
-        if gp.pressed then
-            love.graphics.print("vibration ON: " .. tostring(gp.vibrating), 10, 80)
-        else
-            love.graphics.print("vibration OFF: " .. tostring(gp.vibrating), 10, 80)
-        end
     else
         love.graphics.print("No joysticks found", 10, 50)
     end
@@ -87,7 +82,6 @@ function love.joystickpressed(joystick, button)
 
     gp.button = button
     gp.pressed = true
-    gp.vibrating = joystick:setVibration(1, 1)
 end
 
 function love.joystickreleased(joystick, button)
@@ -96,7 +90,6 @@ function love.joystickreleased(joystick, button)
 
     gp.button = button
     gp.pressed = false
-    gp.vibrating = joystick:setVibration(0, 0)
 end
 
 
